@@ -1,0 +1,590 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Roteiro de Prova — APOO</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: sticky top nav with anchor links; stacked content cards; two-column example tables that collapse to one on phone. */
+:root{
+  --bg:#f7f5f0; --surface:#ffffff; --fg:#20201c; --muted:#6b6a63;
+  --border:#e2ddd0; --accent:#8a3b2b; --accent-soft:#f1e3dc;
+  --warn-bg:#fdf3dc; --warn-border:#e8c468; --warn-fg:#5c4813;
+  --code-bg:#efece3; --pill-bg:#eee8da;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1a17; --surface:#242320; --fg:#ece8df; --muted:#9c988d;
+    --border:#38362f; --accent:#e08a6f; --accent-soft:#332420;
+    --warn-bg:#352c16; --warn-border:#6b551f; --warn-fg:#f0d898;
+    --code-bg:#2b2a25; --pill-bg:#2e2c26;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1a17; --surface:#242320; --fg:#ece8df; --muted:#9c988d;
+  --border:#38362f; --accent:#e08a6f; --accent-soft:#332420;
+  --warn-bg:#352c16; --warn-border:#6b551f; --warn-fg:#f0d898;
+  --code-bg:#2b2a25; --pill-bg:#2e2c26;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:"Inter",system-ui,sans-serif;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+}
+h1,h2,h3{font-family:"Space Grotesk",system-ui,sans-serif; text-wrap:balance; margin:0;}
+a{color:var(--accent);}
+.wrap{max-width:860px; margin:0 auto;}
+header.top{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:10;
+  background:var(--bg); border-bottom:1px solid var(--border);
+  padding-block:14px; margin-bottom:8px;
+}
+header.top .wrap{display:flex; flex-direction:column; gap:10px;}
+header.top h1{font-size:1.25rem;}
+header.top .sub{color:var(--muted); font-size:.85rem;}
+nav.tabs{display:flex; flex-wrap:wrap; gap:6px; overflow-x:auto;}
+nav.tabs a{
+  font-size:.78rem; white-space:nowrap; text-decoration:none; color:var(--fg);
+  background:var(--pill-bg); border:1px solid var(--border); border-radius:999px;
+  padding:5px 11px;
+}
+nav.tabs a:hover{border-color:var(--accent);}
+main{padding-bottom:60px;}
+section{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px; margin-top:18px; scroll-margin-top:118px;
+}
+section h2{font-size:1.3rem; margin-bottom:4px;}
+section .kicker{color:var(--accent); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; font-weight:600;}
+section p{line-height:1.55; color:var(--fg);}
+section p.lead{color:var(--muted); margin-top:6px;}
+h3.subhead{font-size:1rem; margin-top:22px; margin-bottom:8px; padding-top:14px; border-top:1px dashed var(--border);}
+ul.points, ol.points{margin:8px 0; padding-left:20px; line-height:1.6;}
+ul.points li, ol.points li{margin-bottom:5px;}
+.term{font-weight:600;}
+code, .mono{font-family:ui-monospace,Menlo,Consolas,monospace; background:var(--code-bg); padding:1px 6px; border-radius:5px; font-size:.88em;}
+.callout{
+  background:var(--warn-bg); border:1px solid var(--warn-border); color:var(--warn-fg);
+  border-radius:10px; padding:12px 14px; margin:12px 0; font-size:.92rem; line-height:1.5;
+}
+.callout b{display:block; margin-bottom:3px; font-family:"Space Grotesk",sans-serif;}
+table{width:100%; border-collapse:collapse; margin:10px 0; font-size:.88rem;}
+th,td{border:1px solid var(--border); padding:7px 9px; text-align:left; vertical-align:top;}
+th{background:var(--accent-soft); font-family:"Space Grotesk",sans-serif; font-weight:600;}
+.tbl-wrap{overflow-x:auto;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+@media (max-width:620px){.grid2{grid-template-columns:1fr;}}
+.ex-card{background:var(--accent-soft); border-radius:10px; padding:12px 14px;}
+.ex-card h4{font-family:"Space Grotesk",sans-serif; font-size:.9rem; margin:0 0 6px;}
+.ex-card .mono{display:block; background:transparent; padding:0; white-space:pre-wrap; font-size:.82rem; line-height:1.5;}
+details.q{
+  border:1px solid var(--border); border-radius:10px; padding:10px 14px; margin:10px 0;
+  background:var(--bg);
+}
+details.q summary{cursor:pointer; font-weight:600; list-style:revert;}
+details.q[open] summary{margin-bottom:8px;}
+details.q .ans{border-top:1px dashed var(--border); padding-top:8px; margin-top:4px; font-size:.92rem; line-height:1.5;}
+.phase-row{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+.phase{
+  flex:1; min-width:120px; text-align:center; background:var(--pill-bg); border-radius:8px;
+  padding:8px 6px; font-size:.78rem; font-weight:600; font-family:"Space Grotesk",sans-serif;
+}
+footer{color:var(--muted); font-size:.78rem; text-align:center; padding:20px 0 40px;}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div>
+      <h1>Roteiro de Prova — Engenharia de Software (APOO)</h1>
+      <div class="sub">Baseado nos slides do professor (APOO Parte I, II e III — Nabor C. Mendonça) · Prova em 17/11</div>
+    </div>
+    <nav class="tabs">
+      <a href="#processo">1. Processo</a>
+      <a href="#requisitos">2. Requisitos</a>
+      <a href="#casos-de-uso">3. Casos de Uso</a>
+      <a href="#modelo-conceitual">4. Modelo Conceitual</a>
+      <a href="#associacoes">5. Associações &amp; Atributos</a>
+      <a href="#sequencia">6. Sequência &amp; Contratos</a>
+      <a href="#exemplos">7. Exemplos Lado a Lado</a>
+      <a href="#pratica-pdv">8. Prática com o PDV</a>
+      <a href="#quiz">9. Autoavaliação</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section id="intro">
+  <p class="kicker">Antes de começar</p>
+  <h2>O professor não disse o que cai — então cobrimos tudo o que ele distribuiu</h2>
+  <p class="lead">Este roteiro resume na íntegra os três PDFs que ele passou (APOO-1, APOO-2, APOO-3), que são o material clássico de Análise e Projeto Orientados a Objeto do curso de Engenharia de Software. Ele não vai além disso — não há slide sobre GRASP detalhado, nem sobre Diagrama de Estado, então o foco aqui é exatamente o que foi entregue: processo iterativo, requisitos, casos de uso, modelo conceitual, associações, diagramas de sequência de sistema e contratos de operação.</p>
+</section>
+
+<section id="processo">
+  <p class="kicker">Parte I</p>
+  <h2>Análise, Projeto e Processo</h2>
+
+  <h3 class="subhead">Análise x Projeto</h3>
+  <table>
+    <tr><th>Análise — "o quê"</th><th>Projeto — "como"</th></tr>
+    <tr><td>Investigação do problema e dos requisitos</td><td>Descrição de uma solução lógica</td></tr>
+    <tr><td>Requisitos, Casos de uso, Restrições, Vocabulário</td><td>Objetos, Arquitetura, Instalação &amp; Operação, Interface do usuário</td></tr>
+  </table>
+  <p>Os termos não são fixos — variam ao longo de um contínuo e de metodologia para metodologia. A distinção é útil na prática, mas não vale a pena debater definições rígidas.</p>
+
+  <div class="callout">
+    <b>Pegadinha clássica</b>
+    A UML <span class="term">não é</span> um processo, não é APOO e não é um conjunto de regras de projeto. Ela é só a linguagem de notação — "relativamente trivial". A habilidade importante é <span class="term">modelar com objetos</span>, não decorar os símbolos.
+  </div>
+
+  <h3 class="subhead">AOO x POO</h3>
+  <ul class="points">
+    <li><span class="term">AOO</span> (Análise OO): investiga os objetos de domínio e seus relacionamentos → descrito no <span class="term">Modelo de Objetos de Domínio</span> (= Modelo Conceitual).</li>
+    <li><span class="term">POO</span> (Projeto OO): elabora a solução lógica em componentes de software, colaborações e responsabilidades → descrito em <span class="term">Diagramas de Classes</span> e <span class="term">Diagramas de Interação</span>.</li>
+  </ul>
+
+  <h3 class="subhead">A tabela-chave do curso inteiro</h3>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Pergunta</th><th>Fase APOO</th><th>Documento/artefato</th></tr>
+    <tr><td>Quais são os processos de negócio?</td><td>Análise de requisitos</td><td>Casos de uso</td></tr>
+    <tr><td>Quais são os papéis dos empregados (conceitos do domínio)?</td><td>Análise do domínio</td><td>Modelo conceitual</td></tr>
+    <tr><td>Quem é responsável por quê? Como eles interagem?</td><td>Atribuição de responsabilidades, projeto das interações</td><td>Diagramas de classes de projeto, diagramas de colaboração</td></tr>
+  </table>
+  </div>
+  <p class="lead">Essa é exatamente a sequência de 4 fases que vocês reproduziram no Jogo de Dados: Casos de Uso → Modelo Conceitual → Diagrama de Colaboração → Diagrama de Classes de Projeto.</p>
+
+  <h3 class="subhead">Habilidade mais importante da APOO</h3>
+  <p>Saber <span class="term">atribuir responsabilidades</span> a componentes de software (padrões GRASP ajudam nisso). Em segundo lugar, saber <span class="term">identificar os conceitos/abstrações</span> certos.</p>
+
+  <h3 class="subhead">Processo iterativo simplificado — as 3 fases</h3>
+  <div class="phase-row">
+    <div class="phase">Planejamento &amp; Elaboração</div>
+    <div class="phase">Construção</div>
+    <div class="phase">Implantação</div>
+  </div>
+  <ul class="points">
+    <li><span class="term">Planejamento e Elaboração</span>: concepção inicial, investigação de alternativas, definição de requisitos.</li>
+    <li><span class="term">Construção</span>: construção do sistema por múltiplos ciclos de análise, projeto, implementação e teste.</li>
+    <li><span class="term">Implantação</span>: instalação e operação do sistema.</li>
+  </ul>
+  <p>O processo não inclui (de propósito, é simplificado): verificação &amp; validação, divisão do trabalho, gerência de projeto, documentação. O <span class="term">RUP</span> (Processo Racional Unificado), baseado no modelo iterativo, é citado como o processo padrão da indústria — mas o principal fator de sucesso é <span class="term">equipe qualificada</span>, não o processo em si.</p>
+
+  <h3 class="subhead">9 atividades do Planejamento e Elaboração</h3>
+  <ol class="points">
+    <li>Definir plano inicial</li>
+    <li>Criar relatório preliminar de investigação</li>
+    <li>Definir requisitos</li>
+    <li>Registrar termos no glossário <span class="mono">(contínua)</span></li>
+    <li>Implementar protótipo <span class="mono">(opcional)</span></li>
+    <li>Definir casos de uso</li>
+    <li>Definir modelo conceitual inicial <span class="mono">(adiável)</span></li>
+    <li>Definir arquitetura inicial <span class="mono">(contínua, adiável, ordem variada)</span></li>
+    <li>Refinar plano</li>
+  </ol>
+  <p class="lead">Não são lineares — ex.: 7, 4 e 6 podem rodar em paralelo.</p>
+
+  <h3 class="subhead">Ciclos de desenvolvimento (fase de Construção)</h3>
+  <p>Cada ciclo tem duração fixa (2 a 8 semanas) e ataca um ou mais casos de uso (ou versões simplificados deles), com crescimento incremental. Dentro de cada ciclo: <span class="term">Refinar Plano → Sincronizar Artefatos → Análise → Projeto → Implementação → Teste</span>.</p>
+
+  <div class="grid2">
+    <div class="ex-card">
+      <h4>Subatividades de Análise</h4>
+      <span class="mono">1. Casos de uso essenciais
+2. Refinar diag. casos de uso
+3. Refinar modelo conceitual
+4. Refinar glossário
+5. Diagramas de sequência
+6. Contratos de operação
+7. Diagramas de estado (opcional)</span>
+    </div>
+    <div class="ex-card">
+      <h4>Subatividades de Projeto</h4>
+      <span class="mono">1. Casos de uso reais
+2. Relatórios e IU
+3. Refinar arquitetura
+4. Diagramas de interação
+5. Diagramas de classes de projeto
+6. Esquema do banco de dados</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>Atenção</b>
+    Repare: "Diagramas de interação" (que incluem colaboração) e "Diagramas de classes de projeto" ficam na coluna de <span class="term">Projeto</span>, não de Análise. Isso é consistente com a ordem do Jogo de Dados: Modelo Conceitual é Análise; Colaboração e Classes de Projeto são Projeto.
+  </div>
+</section>
+
+<section id="requisitos">
+  <p class="kicker">Parte II</p>
+  <h2>Definição de Requisitos</h2>
+  <p>Estudo de caso do professor para essa parte: sistema <span class="term">POST</span> (terminal de ponto de venda) — o mesmo tipo de sistema do projeto PDV que vocês implementaram.</p>
+
+  <h3 class="subhead">Artefatos básicos de requisitos</h3>
+  <ul class="points">
+    <li><span class="term">Visão geral</span> — propósito do projeto.</li>
+    <li><span class="term">Clientes</span> — quem encomendou/paga pelo sistema.</li>
+    <li><span class="term">Objetivos</span> — o que se quer alcançar.</li>
+    <li><span class="term">Funções</span> — o que o sistema deve fazer.</li>
+    <li><span class="term">Atributos</span> — aspectos não funcionais (ex.: tempo de resposta, tolerância a falha).</li>
+  </ul>
+
+  <h3 class="subhead">3 categorias de função</h3>
+  <table>
+    <tr><th>Categoria</th><th>Definição</th><th>Exemplo</th></tr>
+    <tr><td>Evidente</td><td>Executada e o usuário percebe a execução</td><td>Registrar venda, Processar pagamento</td></tr>
+    <tr><td>Escondida</td><td>Executada de modo transparente ao usuário</td><td>Guardar informações no BD</td></tr>
+    <tr><td>Opcional</td><td>Não afeta custos/funções significativamente</td><td>—</td></tr>
+  </table>
+
+  <p>Atributos (não funcionais) podem ter <span class="term">detalhes</span> (valores simbólicos possíveis) e <span class="term">restrições de contorno</span> (intervalos obrigatórios). Ex.: "tempo de resposta ≤ 5s" é restrição de contorno; "metáfora de janelas e formulários" é detalhe.</p>
+</section>
+
+<section id="casos-de-uso">
+  <p class="kicker">Parte II</p>
+  <h2>Casos de Uso</h2>
+  <p>Descrições narrativas da sequência de eventos de um <span class="term">ator</span> (agente externo) usando o sistema para completar um processo do início ao fim.</p>
+
+  <h3 class="subhead">Atores</h3>
+  <ul class="points">
+    <li>Entidade externa ao sistema que estimula o sistema com eventos de entrada, ou recebe algo dele. Designado pelo <span class="term">papel</span> que exerce (ex.: Cliente, Operador).</li>
+    <li>Um caso de uso tem um <span class="term">ator iniciador</span> (gera o estímulo inicial) e possivelmente vários <span class="term">atores participantes</span>. O iniciador deve ser indicado explicitamente.</li>
+    <li>Categorias típicas: papéis exercidos por pessoas, sistemas de computação, dispositivos elétricos/mecânicos.</li>
+  </ul>
+
+  <h3 class="subhead">Identificando casos de uso — 2 métodos</h3>
+  <ul class="points">
+    <li><span class="term">Baseado em atores</span>: (1) identificar atores; (2) para cada ator, identificar os processos que iniciam ou participam.</li>
+    <li><span class="term">Baseado em eventos</span>: (1) identificar eventos externos aos quais o sistema deve responder; (2) relacionar eventos a atores e casos de uso.</li>
+  </ul>
+  <div class="callout">
+    <b>Erro mais comum</b>
+    Confundir um <span class="term">evento ou passo individual</span> com um caso de uso. Caso de uso é sempre um <span class="term">processo completo</span> (ex.: "Comprar Itens", não "Digitar Senha").
+  </div>
+
+  <h3 class="subhead">Tipos de caso de uso</h3>
+  <table>
+    <tr><th>Tipo</th><th>Descrição</th><th>Exemplo</th></tr>
+    <tr><td>Primário</td><td>Processos principais/mais comuns</td><td>Comprar Itens</td></tr>
+    <tr><td>Secundário</td><td>Processos menos importantes/raros</td><td>Cadastrar Operadores</td></tr>
+    <tr><td>Opcional</td><td>Pode ser ignorado ou adiado</td><td>Solicitar estoque de novo produto</td></tr>
+  </table>
+
+  <h3 class="subhead">4 formatos de caso de uso</h3>
+  <table>
+    <tr><th>Formato</th><th>Quando usar</th></tr>
+    <tr><td><span class="term">Alto-nível</span></td><td>2–3 frases, vago em decisões de projeto. Fase inicial de requisitos. Todos os casos de uso devem existir nesse formato.</td></tr>
+    <tr><td><span class="term">Expandido</span></td><td>Passo a passo ("Ação do Ator" / "Resposta do Sistema"). Só os mais importantes/críticos, na fase de requisitos.</td></tr>
+    <tr><td><span class="term">Essencial</span></td><td>Livre de detalhes de implementação/tecnologia. Escrito na subatividade de <b>Análise</b> do ciclo.</td></tr>
+    <tr><td><span class="term">Real</span></td><td>Comprometido com tecnologias, telas, campos reais. Escrito na subatividade de <b>Projeto</b> do ciclo — só se estritamente necessário.</td></tr>
+  </table>
+
+  <h3 class="subhead">Recomendações de notação</h3>
+  <ul class="points">
+    <li>Nomes de caso de uso sempre começam com <span class="term">verbo</span>.</li>
+    <li>Sequência de eventos inicia com: <span class="mono">"1. Este caso de uso começa quando &lt;Ator&gt; &lt;inicia evento&gt;"</span>.</li>
+    <li><span class="term">Seções Alternativas</span> para desvios incomuns/excepcionais; <span class="term">subseções</span> para desvios de igual importância/probabilidade.</li>
+  </ul>
+
+  <h3 class="subhead">Priorizando casos de uso</h3>
+  <p>Atacar primeiro os de maior influência na arquitetura: impacto significativo no projeto, funções complexas/arriscadas/críticas em tempo, nova tecnologia, processo primário de negócio, efeito direto em lucro/custo.</p>
+  <div class="callout">
+    <b>O caso de uso "Inicializar"/"Start Up"</b>
+    Está presente em praticamente todos os sistemas. É desenvolvido já no primeiro ciclo (versão simplificada) e elaborado incrementalmente depois. No Jogo de Dados, o papel equivalente é a operação <span class="mono">inicializa()</span> de <span class="mono">JogoDeDados</span>.
+  </div>
+
+  <h3 class="subhead">Casos de uso e o limite do sistema</h3>
+  <p>Definir atores/casos de uso exige fixar o <span class="term">limite de atuação</span> (o software de um dispositivo? um departamento? a organização inteira?). Limites diferentes → conjuntos diferentes de atores e casos de uso. Ex.: se o limite é só o POST, "Cliente" não aparece como ator de "Comprar Itens" (quem interage com o terminal é o Operador); se o limite é a Loja inteira, aí sim o Cliente aparece.</p>
+</section>
+
+<section id="modelo-conceitual">
+  <p class="kicker">Parte III</p>
+  <h2>Modelo Conceitual</h2>
+  <p><span class="term">Artefato mais importante da AOO.</span> Representa conceitos relevantes do domínio do problema através de diagramas de estrutura estática: <span class="term">conceitos</span>, <span class="term">associações</span> e <span class="term">atributos</span>.</p>
+
+  <div class="callout">
+    <b>A distinção mais cobrável da prova</b>
+    Um modelo conceitual descreve <span class="term">conceitos do mundo real</span> — não componentes de software! No vocabulário do curso: <span class="term">"conceito"</span> = entidade do mundo real; <span class="term">"classe"</span> = componente de software e suas especificações (a UML usa "classe" para os dois, mas o curso diferencia). Por isso um conceito nunca tem métodos/operações — isso só aparece na fase seguinte (Diagrama de Classes de Projeto).
+  </div>
+
+  <h3 class="subhead">Identificando conceitos — regras</h3>
+  <ul class="points">
+    <li>Melhor especificar demais do que de menos.</li>
+    <li>Não excluir um conceito só porque os requisitos não pedem guardar info sobre ele.</li>
+    <li>Partir de uma lista de categorias comuns de conceitos (veja tabela abaixo).</li>
+    <li>Considerar substantivos e frases nominais do texto do domínio como candidatos a conceito ou atributo.</li>
+  </ul>
+
+  <h3 class="subhead">Categorias típicas de conceito</h3>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Categoria</th><th>Exemplos</th></tr>
+    <tr><td>Objeto físico/tangível</td><td>Terminal de ponto-de-venda, Avião</td></tr>
+    <tr><td>Especificação/projeto/descrição de coisas</td><td>Especificação de produto, Descrição de voo</td></tr>
+    <tr><td>Lugares</td><td>Loja, Aeroporto</td></tr>
+    <tr><td>Transações</td><td>Venda, Pagamento, Reserva</td></tr>
+    <tr><td>Itens de transação</td><td>Itens de venda, Parcelas de pagamento</td></tr>
+    <tr><td>Papéis de pessoas</td><td>Operador, Piloto, Jogador</td></tr>
+    <tr><td>Container de coisas / coisas num container</td><td>Loja / Item, Avião / Passageiro</td></tr>
+    <tr><td>Sistemas externos</td><td>Serviço de crédito</td></tr>
+    <tr><td>Eventos</td><td>Venda, Vôo, Decolagem</td></tr>
+    <tr><td>Organizações, regras/políticas, catálogos, registros, manuais, instrumentos financeiros</td><td>Departamento de vendas; Política de devolução; Catálogo de produtos; Recibo; Manual; Linha de crédito</td></tr>
+  </table>
+  </div>
+
+  <h3 class="subhead">Erro comum: atributo em vez de conceito</h3>
+  <p>Se algo merece seus próprios atributos/associações, é conceito — não atributo. Clássico exemplo de especificação/descrição:</p>
+  <div class="grid2">
+    <div class="ex-card">
+      <h4>Pior</h4>
+      <span class="mono">Item
+ descrição
+ preço
+ número serial
+ UPC</span>
+    </div>
+    <div class="ex-card">
+      <h4>Melhor</h4>
+      <span class="mono">Especificação-Produto      Item
+ descrição          1 —Descreve→ *   número serial
+ preço
+ UPC</span>
+    </div>
+  </div>
+  <p class="lead">Separar a especificação do item evita perda de informação quando o item (instância física) é deletado, e evita duplicar descrição/preço em cada item idêntico.</p>
+
+  <h3 class="subhead">Conceitos de relatório</h3>
+  <p>Incluir no modelo só se o relatório tem papel especial nas regras de negócio (ex.: Recibo dá direito à devolução). Caso contrário, se toda a informação é derivada de outras fontes, não incluir.</p>
+</section>
+
+<section id="associacoes">
+  <p class="kicker">Parte III</p>
+  <h2>Associações e Atributos</h2>
+
+  <h3 class="subhead">Associações</h3>
+  <ul class="points">
+    <li>Relacionamento entre conceitos que indica uma conexão significativa cujo conhecimento precisa ser preservado por algum tempo (milissegundos a anos).</li>
+    <li>Notação: linha + nome + multiplicidade em cada ponta. Inerentemente bidirecional (a "seta de leitura" não tem outro significado além de indicar a direção de leitura do nome, e é frequentemente omitida).</li>
+    <li>Cada ponta é um <span class="term">papel</span>, que pode ter nome, multiplicidade e navegabilidade.</li>
+  </ul>
+
+  <h3 class="subhead">Multiplicidades</h3>
+  <table>
+    <tr><th>Notação</th><th>Significado</th></tr>
+    <tr><td><span class="mono">*</span></td><td>zero ou mais ("muitos")</td></tr>
+    <tr><td><span class="mono">1..*</span></td><td>um ou mais</td></tr>
+    <tr><td><span class="mono">1..40</span></td><td>um a quarenta</td></tr>
+    <tr><td><span class="mono">5</span></td><td>exatamente cinco</td></tr>
+    <tr><td><span class="mono">3, 5, 8</span></td><td>exatamente três, cinco ou oito</td></tr>
+  </table>
+  <p class="lead">O valor depende sempre do contexto do domínio (não existe multiplicidade "correta" universal).</p>
+
+  <h3 class="subhead">Regras para identificar associações</h3>
+  <ul class="points">
+    <li>Focar nas associações cujo conhecimento <span class="term">deve ser preservado</span>.</li>
+    <li>Nomear com expressões verbais que façam sentido lidas no contexto.</li>
+    <li>Evitar associações deriváveis ou redundantes.</li>
+    <li><span class="term">É mais importante identificar conceitos do que associações</span> — associações demais confundem o modelo.</li>
+  </ul>
+  <div class="callout">
+    <b>Eliminar x preservar</b>
+    Elimine associações cujo conhecimento não é exigido pelos requisitos (ex.: "Venda Iniciada-por Operador" é derivável de outra associação). Mas preserve associações que, mesmo sem exigência explícita de conhecimento, enriquecem o entendimento do domínio (ex.: "Venda Iniciada-por Cliente" — deixa claro que é o cliente quem gera a venda). Regra geral: <span class="term">o modelo conceitual é um artefato de comunicação</span>, não só um banco de dados.
+  </div>
+
+  <h3 class="subhead">Atributos</h3>
+  <ul class="points">
+    <li>Um atributo é um <span class="term">dado lógico</span> de um objeto do domínio — tipo primitivo ou valor simples (Data, Número, Texto, Hora, Endereço).</li>
+    <li><span class="term">Não</span> usar atributo para representar um conceito complexo, nem para relacionar conceitos (atributo "chave-estrangeira" — isso é associação disfarçada).</li>
+    <li>Atributo deve ser de tipo <span class="term">não-primitivo</span> quando: é composto de seções separadas (endereço, data); precisa ser validado (CPF); tem outros atributos (preço promocional com validade); é uma quantidade com unidade (valores monetários, medidas).</li>
+    <li><span class="term">Atributo derivado</span> (prefixo <span class="mono">/</span>): valor deduzível de outra informação — ex.: <span class="mono">/quantity</span> dedutível da multiplicidade de uma associação.</li>
+  </ul>
+
+  <div class="callout">
+    <b>Sobre maiúscula/minúscula nos tipos (dúvida recorrente)</b>
+    No <span class="term">Glossário Parcial do sistema POST</span> dos próprios slides do professor, os tipos aparecem capitalizados: <span class="mono">Especificação-Produto.descrição :Texto</span>, <span class="mono">Item de Venda.quantidade :Inteiro</span>, <span class="mono">Especificação-Produto.preço :Quantidade</span>. Ou seja, a convenção do material é escrever o tipo com inicial maiúscula (Texto, Inteiro, Quantidade — equivalentes a String, Integer, Number), por serem tipos primitivos da própria UML, não da linguagem de implementação escolhida depois.
+  </div>
+
+  <h3 class="subhead">Glossário</h3>
+  <p>Documento que define os termos do domínio (parecido com um dicionário de dados de BD). Garante comunicação consistente entre usuários e desenvolvedores. Pode registrar casos de uso, tipos (conceitos) e atributos, cada um com categoria e comentário.</p>
+</section>
+
+<section id="sequencia">
+  <p class="kicker">Parte III</p>
+  <h2>Diagramas de Sequência de Sistema e Contratos de Operação</h2>
+
+  <h3 class="subhead">Diagrama de sequência (de sistema)</h3>
+  <p>Ilustra a ordem das interações dos atores externos com o sistema, tratado como <span class="term">caixa-preta</span> (uma única linha de vida <span class="mono">:System</span>).</p>
+  <ul class="points">
+    <li><span class="term">Evento de sistema</span>: evento externo de entrada gerado por um ator → dispara uma <span class="term">operação de sistema</span> de mesmo nome.</li>
+    <li>Passos para desenhar: (1) linha vertical do sistema; (2) linha vertical de cada ator que opera diretamente; (3) a partir da sequência típica de eventos do caso de uso, identificar e ilustrar os eventos; (4) opcionalmente incluir o texto do caso de uso ao lado.</li>
+    <li>Nomeação: começar com verbo; enfatizar <span class="term">intenção</span>, não o meio físico (<span class="mono">encerrarVenda()</span>, não <span class="mono">pressionarTeclaEnter()</span>); nível mais alto de abstração (<span class="mono">fazerPagamento()</span>, não <span class="mono">entrarQuantia()</span>).</li>
+  </ul>
+
+  <h3 class="subhead">Contratos de operação</h3>
+  <p>Documento declarativo que descreve os compromissos de uma operação (classe, método ou operação geral de sistema): pré-condições e pós-condições de mudança de estado.</p>
+  <table>
+    <tr><th>Seção</th><th>Conteúdo</th></tr>
+    <tr><td>Contrato</td><td>Nome e parâmetros da operação</td></tr>
+    <tr><td>Responsabilidades</td><td>Descrição informal do propósito</td></tr>
+    <tr><td>Tipo</td><td>Nome do tipo (conceito/classe/interface)</td></tr>
+    <tr><td>Referência</td><td>Funções, casos de uso relacionados</td></tr>
+    <tr><td>Notas / Exceções / Saída</td><td>Algoritmos; casos excepcionais; saídas não-IU</td></tr>
+    <tr><td>Pré-condições</td><td>Pressupostos sobre o estado antes da execução</td></tr>
+    <tr><td>Pós-condições</td><td>Estado do sistema <b>depois</b> — sempre no passado</td></tr>
+  </table>
+
+  <h3 class="subhead">Como escrever pós-condições</h3>
+  <p>Toda mudança cai em uma destas 3 categorias (a formação/quebra de associação é o <span class="term">erro mais comum</span> de se esquecer):</p>
+  <ol class="points">
+    <li>Criação e remoção de <span class="term">instância</span></li>
+    <li>Modificação de <span class="term">atributo</span></li>
+    <li>Formação e quebra de <span class="term">associação</span></li>
+  </ol>
+  <div class="callout">
+    <b>Analogia "Palco e Cortina"</b>
+    Imagine os objetos no palco de um teatro. (1) Antes da operação, fotografe o palco. (2) Feche a cortina e execute a operação. (3) Abra a cortina e fotografe de novo. (4) Compare as duas fotos — as diferenças viram as pós-condições, escritas no passado.
+  </div>
+</section>
+
+<section id="exemplos">
+  <p class="kicker">Aplicação</p>
+  <h2>Os dois estudos de caso lado a lado</h2>
+  <p>O professor usa dois exemplos ao longo dos slides: o <span class="term">Jogo de Dados</span> (o que vocês modelaram e implementaram) e o <span class="term">POST / Sistema de Ponto de Venda</span> (o mesmo domínio do projeto PDV). Ter os dois lado a lado ajuda a responder questões que pedem para aplicar o método a um cenário novo na prova.</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th></th><th>Jogo de Dados</th><th>POST (Ponto de Venda)</th></tr>
+    <tr><td>Caso de uso principal</td><td>Jogar — "jogador rola os dados; se soma = 7, ganha"</td><td>Comprar Itens — cliente chega, operador registra itens e coleta pagamento</td></tr>
+    <tr><td>Conceitos do Modelo Conceitual</td><td>Jogador, Dado, JogoDeDados</td><td>POST, Item, Store, Sale, Payment, SalesLineItem, Customer, Cashier, Manager, ProductCatalog, ProductSpecification</td></tr>
+    <tr><td>Associações</td><td>Rola (Jogador–Dado, 1-2), Joga (Jogador–JogoDeDados, 1-1), Inclui (JogoDeDados–Dado, 1-2)</td><td>Captured-on (Sale–POST), Paid-by (Sale–Payment), Contains (ProductCatalog–ProductSpecification), etc.</td></tr>
+    <tr><td>Conceito de "especificação"</td><td>— (não se aplica; Dado não tem especificação separada)</td><td>ProductSpecification separado de Item (padrão descrição/especificação)</td></tr>
+    <tr><td>Operações de sistema (sequência)</td><td><span class="mono">inicializa()</span></td><td><span class="mono">enterItem(UPC, quantity)</span>, <span class="mono">endSale()</span>, <span class="mono">makePayment(amount)</span></td></tr>
+    <tr><td>Diagrama de colaboração</td><td><span class="mono">:Jogador.joga() → d1:Dado.rola(), d2:Dado.rola()</span></td><td>(não detalhado nos slides — foco migra para diagrama de classes)</td></tr>
+    <tr><td>Classes de projeto (métodos)</td><td>Jogador.joga(), Dado.rola(), JogoDeDados.inicializa()</td><td>(exercício do contrato de operação cobre o equivalente)</td></tr>
+  </table>
+  </div>
+
+  <div class="callout">
+    <b>Se a prova pedir para modelar algo novo</b>
+    Siga a ordem do processo: (1) escreva o caso de uso alto-nível; (2) liste conceitos candidatos usando as categorias típicas; (3) desenhe o modelo conceitual (só conceitos + atributos + associações, <b>sem</b> métodos); (4) pense nas operações de sistema que os eventos externos disparam; (5) só então passe para diagrama de colaboração/classes de projeto, que é onde os métodos aparecem.
+  </div>
+</section>
+
+<section id="pratica-pdv">
+  <p class="kicker">Prática dirigida</p>
+  <h2>Aplicando tudo isso no PDV de vocês</h2>
+  <p>Na pasta <span class="mono">Biblioteca/Trabalhos</span> tem o molde da <span class="term">Parte 5</span> do projeto (Glossário, Modelo Conceitual, Arquitetura, Diagramas de Sequência, Contratos de Operação) — não é uma entrega pendente agora, mas é o melhor treino possível pra prova, porque usa exatamente esses artefatos sobre um sistema que vocês já modelaram de verdade: o <span class="term">PDV</span> (Ponto de Venda), feito em grupo com Allan, Jesiel e Pedro Cezar. O <span class="mono">PDVv1.xmi</span> já tem diagrama de classes, Diagrama de Arquitetura, um Diagrama de Sequência ("Comprar itens com Dinheiro") e diagrama de casos de uso.</p>
+
+  <h3 class="subhead">Classes e atributos já modelados</h3>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Classe</th><th>Atributos</th><th>Observação</th></tr>
+    <tr><td><span class="mono">PDV</span></td><td>numero</td><td>Equivalente ao POST do Larman</td></tr>
+    <tr><td><span class="mono">Item</span></td><td>codigo, descricao, preco, unidade</td><td>Equivalente ao Item/ProductSpecification</td></tr>
+    <tr><td><span class="mono">ItemVenda</span></td><td>quantidade</td><td>Equivalente a SalesLineItem</td></tr>
+    <tr><td><span class="mono">Venda</span></td><td>instante, itens</td><td>Equivalente a Sale</td></tr>
+    <tr><td><span class="mono">Pagamento</span></td><td>valor</td><td>Equivalente a Payment</td></tr>
+    <tr><td><span class="mono">Loja</span></td><td>razaoSocial, cnpj, nomeFantasia</td><td>Equivalente a Store</td></tr>
+    <tr><td><span class="mono">Aplicacao</span></td><td>—</td><td>Tem o método <span class="mono">main(args)</span> — a implementação é em Java</td></tr>
+  </table>
+  </div>
+  <div class="callout">
+    <b>Conexão direta com a discussão do Jesiel</b>
+    Reparem: no PDV de vocês o <span class="mono">main()</span> está dentro de uma classe (<span class="mono">Aplicacao</span>), porque a implementação é em Java — lá isso é obrigatório. Já no Jogo de Dados, feito em C++, <span class="mono">main()</span> tem que ser função global. É a prova concreta, dentro do próprio material de vocês, de que a regra muda com a linguagem — nenhum dos dois projetos está errado.
+  </div>
+
+  <h3 class="subhead">Operações já desenhadas no Diagrama de Sequência "Comprar itens com Dinheiro"</h3>
+  <ul class="points">
+    <li><span class="mono">registrarItem(codigo : int, quant : float) : Item</span></li>
+    <li><span class="mono">finalizarVendas() : float</span></li>
+    <li><span class="mono">registrarPagamento(pagamento : float) : float</span></li>
+    <li><span class="mono">registrarLog()</span></li>
+  </ul>
+  <p class="lead">(No arquivo o segundo parâmetro de registrarPagamento está digitado como <span class="mono">pagamaneto</span> — é só um erro de digitação do grupo, vale a pena corrigir antes de entregar qualquer coisa nova.)</p>
+
+  <h3 class="subhead">Exemplo resolvido: Contrato de Operação para registrarItem</h3>
+  <p>Seguindo exatamente o molde de <span class="mono">entrarItem</span> do Larman (slides 47–48 do APOO-3):</p>
+  <table>
+    <tr><th>Seção</th><th>Conteúdo</th></tr>
+    <tr><td>Contrato</td><td><span class="mono">registrarItem (codigo: int, quant: float)</span></td></tr>
+    <tr><td>Responsabilidades</td><td>Registra a venda de um item e o adiciona à venda corrente. Mostra descrição e preço do item.</td></tr>
+    <tr><td>Tipo</td><td>PDV</td></tr>
+    <tr><td>Referência</td><td>Caso de uso: Comprar Itens com Dinheiro</td></tr>
+    <tr><td>Exceções</td><td>Se código inválido, indicar erro.</td></tr>
+    <tr><td>Pré-condições</td><td>Código é conhecido do sistema (existe um Item cadastrado com esse código).</td></tr>
+    <tr><td>Pós-condições</td><td>
+      Se nova venda, uma <i>Venda</i> foi criada (criação de instância).<br>
+      Se nova venda, a nova <i>Venda</i> foi associada a um <i>PDV</i> (formação de associação).<br>
+      Um <i>ItemVenda</i> foi criado (criação de instância).<br>
+      O <i>ItemVenda</i> foi associado à <i>Venda</i> (formação de associação).<br>
+      <i>ItemVenda.quantidade</i> foi definido para <i>quant</i> (modificação de atributo).<br>
+      O <i>ItemVenda</i> foi associado a um <i>Item</i>, com base no casamento de códigos (formação de associação).
+    </td></tr>
+  </table>
+
+  <h3 class="subhead">Agora tente você: finalizarVendas() e registrarPagamento()</h3>
+  <p>Use a mesma analogia "palco e cortina" — fotografe o estado antes, execute a operação mentalmente, fotografe depois, e escreva só o que mudou (sempre nas 3 categorias: instância / atributo / associação):</p>
+  <details class="q">
+    <summary>Dica para <span class="mono">registrarPagamento(valor: float)</span></summary>
+    <div class="ans">Compare com <span class="mono">fazerPagamento</span> do Larman (slides 55–56): um <i>Pagamento</i> é criado, <i>Pagamento.valor</i> é definido, o <i>Pagamento</i> é associado à <i>Venda</i>, e a <i>Venda</i> é associada à <i>Loja</i> (para entrar no log de vendas completadas). Exceção: se o valor for menor que o total da venda, indicar erro.</div>
+  </details>
+  <details class="q">
+    <summary>Dica para <span class="mono">finalizarVendas()</span></summary>
+    <div class="ans">Compare com <span class="mono">encerrarVenda</span> do Larman (slide 54): não cria instância nova — só modifica um atributo (algo como <i>Venda.finalizada</i> = true) e mostra o total. Pergunta pra pensar: esse atributo "finalizada" já existe no modelo de vocês, ou é um dos casos (como no slide do Larman) em que você percebe, ao escrever o contrato, que falta acrescentar um atributo?</div>
+  </details>
+</section>
+
+<section id="quiz">
+  <p class="kicker">Revisão ativa</p>
+  <h2>Autoavaliação rápida</h2>
+  <p class="lead">Pense na resposta antes de abrir. São baseadas em pontos que os slides destacam explicitamente como erro comum ou pegadinha.</p>
+
+  <details class="q">
+    <summary>Um Modelo Conceitual pode mostrar o método <span class="mono">joga()</span> da classe Jogador?</summary>
+    <div class="ans">Não. Modelo Conceitual representa conceitos do mundo real, nunca componentes de software — logo, nunca tem operações/métodos. Métodos só aparecem no Diagrama de Classes de Projeto (fase de Projeto).</div>
+  </details>
+
+  <details class="q">
+    <summary>"Venda Armazena Item" é uma associação válida para o modelo conceitual do POST?</summary>
+    <div class="ans">Depende de preservar conhecimento exigido pelos requisitos. No exemplo dos slides, "Loja Armazena Item" foi eliminada por não ser exigida pelos requisitos. A regra geral: elimine associações deriváveis/redundantes, mas preserve as que ajudam no entendimento do domínio, mesmo sem exigência explícita.</div>
+  </details>
+
+  <details class="q">
+    <summary>Qual é o erro mais comum ao escrever pós-condições de um contrato de operação?</summary>
+    <div class="ans">Esquecer de registrar a formação ou quebra de associações. As pós-condições cobrem só 3 coisas: criação/remoção de instância, modificação de atributo, e formação/quebra de associação.</div>
+  </details>
+
+  <details class="q">
+    <summary>"Digitar Senha" pode ser um caso de uso?</summary>
+    <div class="ans">Normalmente não — é um passo individual, não um processo completo. O erro mais comum ao identificar casos de uso é confundir eventos/passos com processos inteiros (ex.: "Login" é o processo completo; digitar a senha é só um passo dele).</div>
+  </details>
+
+  <details class="q">
+    <summary>Qual a diferença entre um caso de uso "essencial" e um "real"?</summary>
+    <div class="ans">Essencial é livre de decisões de tecnologia/interface (ex.: "o Operador registra o identificador do item") e é escrito na subatividade de Análise. Real já compromete com a tecnologia real (ex.: "o Operador digita o UPC no campo da Janela 1 e pressiona Enter") e é escrito na subatividade de Projeto — só quando estritamente necessário.</div>
+  </details>
+
+  <details class="q">
+    <summary>Por que separar Especificação-Produto de Item, em vez de colocar descrição/preço direto em Item?</summary>
+    <div class="ans">Porque descrição/preço são da especificação do produto (iguais para todas as unidades daquele produto), não de cada unidade física vendida. Separar evita perda de informação quando uma unidade é deletada, e evita duplicar/redundar dados entre unidades idênticas.</div>
+  </details>
+
+  <details class="q">
+    <summary>"Jogador usa Dado" e "Jogador Rola Dado" — qual nome de associação é melhor, segundo as regras do curso?</summary>
+    <div class="ans">"Rola", porque associações devem ser nomeadas com expressões verbais específicas que façam sentido no contexto do domínio — nomes genéricos demais ("usa", "tem") tendem a não comunicar a real natureza do relacionamento.</div>
+  </details>
+
+  <details class="q">
+    <summary>No sistema POST, por que "Cliente" às vezes não aparece como ator de "Comprar Itens"?</summary>
+    <div class="ans">Porque depende do limite do sistema escolhido. Se o limite é só o POST (o terminal), quem interage diretamente com ele é o Operador — o Cliente não toca no sistema. Se o limite é a Loja inteira, o Cliente passa a ser o ator (ele interage com a loja como um todo). Limites diferentes geram conjuntos diferentes de atores/casos de uso.</div>
+  </details>
+</section>
+
+</main>
+
+<footer>Roteiro gerado a partir de APOO-1, APOO-2 e APOO-3 (Nabor C. Mendonça, 2001) — material distribuído pelo professor. Revise junto com o roteiro de estudo do Jogo de Dados já publicado anteriormente.</footer>
+
+</body></html>
