@@ -1,0 +1,274 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Simulador de Partições</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: tela única de apresentação. Barra de controles no topo, a fita de memória fixa no centro, raciocínio do algoritmo embaixo. Nada rola em tela de notebook/projetor. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --ink:#151c26; --muted:#586374; --line:#d6dce5;
+  --accent:#2457c5; --accent-ink:#ffffff; --accent-soft:#e2eafb; --ok:#1d7a4c; --ok-soft:#ddf2e6; --no:#b23a3a; --no-soft:#f8e2e2;
+  --free:#eef1f5; --hatch:#c6cdd8;
+  --p1:#3b6fd8; --p2:#d0782b; --p3:#2f9a7a; --p4:#9b59c9; --p5:#c94f7c; --p6:#6c8a1f;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10151c; --surface:#18202a; --ink:#e7ecf3; --muted:#9ba7b7; --line:#2b3543;
+  --accent:#7ea3ff; --accent-ink:#0b1220; --accent-soft:#1e2b46; --ok:#5fcf98; --ok-soft:#163226; --no:#ff8a8a; --no-soft:#3a1d1d;
+  --free:#1c2430; --hatch:#334050;
+  --p1:#5b8cf0; --p2:#e8964f; --p3:#4cc19e; --p4:#b884e0; --p5:#e27aa0; --p6:#97b84a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151c; --surface:#18202a; --ink:#e7ecf3; --muted:#9ba7b7; --line:#2b3543;
+  --accent:#7ea3ff; --accent-ink:#0b1220; --accent-soft:#1e2b46; --ok:#5fcf98; --ok-soft:#163226; --no:#ff8a8a; --no-soft:#3a1d1d;
+  --free:#1c2430; --hatch:#334050;
+  --p1:#5b8cf0; --p2:#e8964f; --p3:#4cc19e; --p4:#b884e0; --p5:#e27aa0; --p6:#97b84a; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:clamp(13px,1.05vw + .35vh,18px);line-height:1.45}
+.app{height:100%;display:grid;grid-template-rows:auto auto 1fr;gap:clamp(10px,1.6vh,18px);
+  padding-block:clamp(10px,1.8vh,20px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  max-width:1500px;margin:0 auto}
+h1,h2,h3{margin:0;line-height:1.2;text-wrap:balance}
+/* top bar */
+.top{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+.brand{display:grid;gap:2px}
+.brand .eyebrow{font-family:var(--mono);font-size:.68em;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.brand h1{font-size:1.35em;font-weight:700}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{font:500 .9em var(--sans);border:0;background:transparent;color:var(--ink);padding:.5em .95em;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.btn{font:500 .9em var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:.5em .95em;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible,.blk:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+kbd{font-family:var(--mono);font-size:.78em;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 .35em;background:var(--surface)}
+/* stage: the tape never moves */
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:clamp(12px,2vh,22px) clamp(12px,1.6vw,24px);display:grid;gap:clamp(8px,1.2vh,14px);min-width:0}
+.stage-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.stage-head h2{font-size:1.05em;font-weight:600}
+.stage-head .sub{color:var(--muted);font-size:.85em}
+.tapes{display:grid;gap:clamp(6px,1vh,12px)}
+.tape-line{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+.tape-line .lbl{font-weight:600;font-size:.85em;width:6.5em}
+.tape-line.single{grid-template-columns:1fr}
+.tape-line.single .lbl{display:none}
+.tapewrap{min-width:0}
+.tape{display:flex;height:clamp(54px,13vh,130px);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tapes.many .tape{height:clamp(40px,7.2vh,74px)}
+.blk{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff;font-family:var(--mono);font-size:.82em;border-right:2px solid var(--surface);min-width:0;overflow:hidden;transition:flex-grow .45s ease,background-color .3s}
+.blk:last-child{border-right:0}
+.blk b{font-weight:600;font-size:1.15em}
+.blk.free{color:var(--muted);background:repeating-linear-gradient(135deg,var(--free) 0 8px,var(--hatch) 8px 9px)}
+.blk.hl{box-shadow:inset 0 0 0 4px var(--accent)}
+.blk.new{animation:pop .6s ease}
+.blk.click{cursor:pointer}
+.blk.click:hover{filter:brightness(1.08)}
+@keyframes pop{0%{filter:brightness(1.7)}100%{filter:none}}
+@media (prefers-reduced-motion:reduce){.blk{transition:none}.blk.new{animation:none}}
+.ruler{position:relative;height:1.3em;font-family:var(--mono);font-size:.7em;color:var(--muted);margin-top:3px}
+.ruler span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.ruler span.first{transform:none}.ruler span.last{transform:translateX(-100%)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.88em}
+.stats div{display:flex;gap:6px;align-items:baseline}
+.stats .k{color:var(--muted)}
+.stats .v{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+/* bottom */
+.bottom{display:grid;grid-template-columns:minmax(250px,.8fr) 1.6fr;gap:clamp(10px,1.4vw,18px);min-height:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:clamp(12px,1.8vh,20px);display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0;overflow:auto}
+.card h3{font-size:.98em}
+.steps{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.steps li{display:flex;gap:10px;align-items:baseline;color:var(--muted);font-size:.92em}
+.steps .dot{font-family:var(--mono);font-size:.78em;border:1px solid var(--line);border-radius:4px;padding:0 .45em;flex:none}
+.steps li.done{color:var(--ink)}
+.steps li.now{color:var(--ink);font-weight:600}
+.steps li.now .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hint{color:var(--muted);font-size:.85em}
+table{border-collapse:collapse;width:100%;font-size:.9em}
+.tbl{overflow-x:auto}
+th,td{text-align:left;padding:.42em .7em;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.72em;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+tr.chosen td{background:var(--accent-soft);font-weight:600}
+.tag{display:inline-block;font-size:.78em;padding:0 .6em;border-radius:99px;font-weight:600}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}.tag.no{background:var(--no-soft);color:var(--no)}
+.verdict{border-left:3px solid var(--accent);padding:.5em .9em;background:var(--accent-soft);border-radius:0 8px 8px 0;margin:0}
+.verdict.no{border-color:var(--no);background:var(--no-soft)}
+.form{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.field{display:grid;gap:3px}
+.field label{font-size:.78em;color:var(--muted)}
+.field input{font:500 .95em var(--mono);padding:.45em .6em;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:6.5em}
+.keys{font-size:.78em;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:auto}
+p{margin:0}
+@media (max-width:760px){
+  html,body{height:auto}
+  .app{height:auto}
+  .bottom{grid-template-columns:1fr}
+  .tape{height:76px}
+  .keys{display:none}
+}
+</style>
+
+<div class="app" id="app">
+  <div class="top">
+    <div class="brand">
+      <span class="eyebrow">Cap. 9 · Machado &amp; Maia · Exercício 12</span>
+      <h1>Simulador de Partições</h1>
+    </div>
+    <div class="controls">
+      <div class="seg tabs" role="group" aria-label="Modo" id="tabs">
+        <button id="tab-passo" data-m="passo" aria-pressed="true">Passo a passo</button>
+        <button id="tab-comp" data-m="comp" aria-pressed="false">Comparar</button>
+        <button id="tab-livre" data-m="livre" aria-pressed="false">Modo livre</button>
+      </div>
+      <div class="seg" role="group" aria-label="Estratégia" id="seg">
+        <button id="st-first" data-s="first" aria-pressed="true">First-fit</button>
+        <button id="st-best" data-s="best" aria-pressed="false">Best-fit</button>
+        <button id="st-worst" data-s="worst" aria-pressed="false">Worst-fit</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="stage" aria-live="polite">
+    <div class="stage-head"><h2 id="stageTitle"></h2><span class="sub" id="stageSub"></span></div>
+    <div class="tapes" id="tapes"></div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <div class="bottom">
+    <section class="card" id="left"></section>
+    <section class="card" id="right"></section>
+  </div>
+</div>
+
+<script>
+const TOTAL=50;
+const COLORS={A:'--p1',B:'--p2',C:'--p3',D:'--p4',E:'--p5'}; const extra=['--p6','--p1','--p2','--p3','--p4','--p5']; let ex=0;
+const colorOf=n=>{if(!COLORS[n])COLORS[n]=extra[ex++%extra.length];return 'var('+COLORS[n]+')';};
+const NAMES={first:'First-fit',best:'Best-fit',worst:'Worst-fit'};
+const NOTES={first:'pega a primeira área livre em que o programa cabe',best:'pega a menor área livre em que o programa cabe',worst:'pega a maior área livre'};
+const initial=()=>[{start:0,size:5,proc:'A'},{start:5,size:3,proc:'B'},{start:8,size:10,proc:null},{start:18,size:6,proc:'C'},{start:24,size:26,proc:null}];
+const clone=m=>m.map(b=>({...b}));
+function choose(mem,size,s){const rows=[];let c=-1;mem.forEach((b,i)=>{if(b.proc)return;const fits=b.size>=size;rows.push({i,start:b.start,size:b.size,fits,left:b.size-size});if(!fits)return;
+  if(s==='first'){if(c<0)c=i;}else if(c<0||(s==='best'?b.size<mem[c].size:b.size>mem[c].size))c=i;});return{rows,chosen:c};}
+function alloc(mem,name,size,s){const{rows,chosen}=choose(mem,size,s);if(chosen<0)return{mem,rows,chosen,ok:false};const b=mem[chosen],out=clone(mem);
+  const parts=[{start:b.start,size,proc:name}];if(b.size>size)parts.push({start:b.start+size,size:b.size-size,proc:null});out.splice(chosen,1,...parts);
+  return{mem:out,rows,chosen,ok:true,newStart:b.start};}
+function release(mem,name){const out=clone(mem).map(b=>b.proc===name?{...b,proc:null}:b);const m=[];let j=0;for(const b of out){const l=m[m.length-1];if(l&&!l.proc&&!b.proc){l.size+=b.size;j++;}else m.push({...b});}return{mem:m,joins:j};}
+const stats=mem=>{const f=mem.filter(b=>!b.proc);return{total:f.reduce((a,b)=>a+b.size,0),areas:f.length,maior:f.reduce((a,b)=>Math.max(a,b.size),0)};};
+
+function tapeEl(mem,opts={}){
+  const w=document.createElement('div');w.className='tapewrap';
+  const t=document.createElement('div');t.className='tape';
+  mem.forEach(b=>{const d=document.createElement('div');
+    d.className='blk'+(b.proc?'':' free')+(opts.hl===b.start?' hl':'')+(opts.newStart===b.start&&b.proc?' new':'');
+    d.style.flex=b.size+' 1 0';if(b.proc)d.style.background=colorOf(b.proc);
+    d.innerHTML=b.proc?`<b>${b.proc}</b><span>${b.size}K</span>`:(b.size<3?`<span>${b.size}K</span>`:`<span>livre</span><span>${b.size}K</span>`);
+    d.title=(b.proc?'Programa '+b.proc:'Área livre')+` · início ${b.start} KB · ${b.size} KB`;
+    if(opts.onClick&&b.proc){d.classList.add('click');d.tabIndex=0;d.setAttribute('role','button');d.setAttribute('aria-label','Terminar programa '+b.proc);
+      d.addEventListener('click',()=>opts.onClick(b.proc));d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();opts.onClick(b.proc);}});}
+    t.appendChild(d);});
+  const r=document.createElement('div');r.className='ruler';
+  const marks=[...new Set([0,TOTAL,...mem.map(b=>b.start)])].sort((a,b)=>a-b);
+  marks.forEach((m,k)=>{const s=document.createElement('span');s.style.left=(m/TOTAL*100)+'%';s.textContent=m+(k===marks.length-1?' KB':'');if(k===0)s.className='first';if(k===marks.length-1)s.className='last';r.appendChild(s);});
+  w.append(t,r);return w;}
+function setTapes(list){const box=document.getElementById('tapes');box.innerHTML='';box.className='tapes'+(list.length>1?' many':'');
+  list.forEach(it=>{const line=document.createElement('div');line.className='tape-line'+(list.length>1?'':' single');
+    const l=document.createElement('div');l.className='lbl';l.textContent=it.label||'';line.append(l,tapeEl(it.mem,it.opts));box.appendChild(line);});}
+function setStats(mem){const s=stats(mem);document.getElementById('stats').innerHTML=
+  `<div><span class="k">Livre total</span><span class="v">${s.total} KB</span></div><div><span class="k">Áreas livres</span><span class="v">${s.areas}</span></div><div><span class="k">Maior bloco livre</span><span class="v">${s.maior} KB</span></div>`;}
+function table(rows,chosen,size){if(!rows.length)return'<p class="hint">Não há nenhuma área livre.</p>';
+  let h='<div class="tbl"><table><thead><tr><th>Área livre</th><th>Início</th><th>Tamanho</th><th>Cabe '+size+' KB?</th><th>Sobraria</th></tr></thead><tbody>';
+  rows.forEach((r,k)=>{h+=`<tr class="${r.i===chosen?'chosen':''}"><td>${k+1}${r.i===chosen?' ← escolhida':''}</td><td class="n">${r.start} KB</td><td class="n">${r.size} KB</td><td>${r.fits?'<span class="tag ok">cabe</span>':'<span class="tag no">não cabe</span>'}</td><td class="n">${r.fits?r.left+' KB':'—'}</td></tr>`;});
+  return h+'</tbody></table></div>';}
+function why(rows,chosen,s,size){const fit=rows.filter(r=>r.fits);if(chosen<0)return`Nenhuma área livre tem ${size} KB ou mais. O programa espera na fila.`;const c=rows.find(r=>r.i===chosen);
+  if(s==='first')return`First-fit parou na primeira área que cabe: ${c.size} KB, em ${c.start} KB. Sobram ${c.left} KB.`;
+  if(s==='best')return`Best-fit comparou as ${fit.length} áreas que cabem e pegou a menor: ${c.size} KB, em ${c.start} KB. Sobram ${c.left} KB.`;
+  return`Worst-fit comparou as ${fit.length} áreas que cabem e pegou a maior: ${c.size} KB, em ${c.start} KB. Sobram ${c.left} KB.`;}
+const keysHtml=extra=>`<div class="keys"><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> estratégia</span>${extra}<span><kbd>P</kbd><kbd>C</kbd><kbd>L</kbd> modo</span><span><kbd>F</kbd> tela cheia</span></div>`;
+
+/* estado */
+let mode='passo', strat='first', step=0, memL=initial(), lastL=null, msgL=null;
+const OPS=[{t:'alloc',n:'D',k:6,label:'Alocar D (6 KB)'},{t:'free',n:'A',label:'Liberar a área de A'},{t:'alloc',n:'E',k:4,label:'Alocar E (4 KB)'}];
+function runTo(s,upto){let mem=initial(),last=null;for(let i=0;i<upto;i++){const o=OPS[i];
+  if(o.t==='alloc'){const r=alloc(mem,o.n,o.k,s);last={op:o,...r};mem=r.mem;}else{const r=release(mem,o.n);last={op:o,joins:r.joins};mem=r.mem;}}return{mem,last};}
+
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+  document.querySelectorAll('#seg button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.s===strat);b.disabled=mode==='comp';});
+  const L=document.getElementById('left'),R=document.getElementById('right'),T=document.getElementById('stageTitle'),S=document.getElementById('stageSub');
+  if(mode==='passo'){
+    const{mem,last}=runTo(strat,step);
+    T.textContent=`Memória de 50 KB · ${NAMES[strat]}`;S.textContent=`${NAMES[strat]} ${NOTES[strat]}`;
+    setTapes([{mem,opts:{newStart:last&&last.newStart}}]);setStats(mem);
+    L.innerHTML=`<h3>Exercício 12 (seção 9.7)</h3><ol class="steps">`+
+      `<li class="${step===0?'now':'done'}"><span class="dot">0</span>Estado inicial: A, B, livre 10, C, livre 26</li>`+
+      OPS.map((o,i)=>`<li class="${i+1===step?'now':(i+1<step?'done':'')}"><span class="dot">${'abc'[i]}</span>${o.label}</li>`).join('')+`</ol>
+      <div class="row"><button class="btn" id="bBack">Voltar</button><button class="btn primary" id="bNext">Próximo passo</button><button class="btn" id="bReset">Recomeçar</button></div>`+
+      keysHtml('<span><kbd>←</kbd><kbd>→</kbd> passos</span><span><kbd>R</kbd> recomeçar</span>');
+    document.getElementById('bBack').disabled=step===0;document.getElementById('bNext').disabled=step===OPS.length;
+    document.getElementById('bBack').onclick=()=>go(-1);document.getElementById('bNext').onclick=()=>go(1);document.getElementById('bReset').onclick=()=>{step=0;render();};
+    if(!last){R.innerHTML=`<h3>Como o algoritmo decide</h3><p class="hint">Aperte "Próximo passo" (ou a seta →). A cada alocação, esta tabela mostra as áreas livres que o ${NAMES[strat]} examinou e qual ele escolheu.</p>`;}
+    else if(last.op.t==='alloc'){R.innerHTML=`<h3>Como o ${NAMES[strat]} decidiu: ${last.op.label}</h3>${table(last.rows,last.chosen,last.op.k)}<p class="verdict">${why(last.rows,last.chosen,strat,last.op.k)}</p>`;}
+    else{R.innerHTML=`<h3>${last.op.label}</h3><p class="verdict">A área de A (5 KB, no início) voltou a ficar livre. Ao lado dela está B, ocupado, então não houve junção de áreas livres: ficou uma área livre separada.</p>`;}
+  }
+  else if(mode==='comp'){
+    const res=['first','best','worst'].map(s=>{const{mem}=runTo(s,OPS.length);const e=mem.find(b=>b.proc==='E');return{s,mem,e,st:stats(mem)};});
+    T.textContent='Fim do exercício 12 nas três estratégias';S.textContent='Contorno azul: onde o programa E foi parar';
+    setTapes(res.map(r=>({label:NAMES[r.s],mem:r.mem,opts:{hl:r.e.start}})));
+    document.getElementById('stats').innerHTML='';
+    L.innerHTML=`<h3>Placar final</h3><div class="tbl"><table><thead><tr><th>Estratégia</th><th>Livre</th><th>Áreas</th><th>Maior bloco</th></tr></thead><tbody>`+
+      res.map(r=>`<tr><td>${NAMES[r.s]}</td><td class="n">${r.st.total} KB</td><td class="n">${r.st.areas}</td><td class="n">${r.st.maior} KB</td></tr>`).join('')+`</tbody></table></div>`+keysHtml('');
+    R.innerHTML=`<h3>O que a comparação mostra</h3>
+      <p>As três terminam com os mesmos <strong>31 KB livres</strong>. Muda a forma como eles ficam espalhados: isso é a <strong>fragmentação externa</strong>.</p>
+      <p><strong>First-fit</strong> foi o mais rápido, mas deixou uma migalha de 1 KB no início.</p>
+      <p><strong>Best-fit</strong> encaixou E num buraco de 4 KB exato e preservou o bloco de 26 KB.</p>
+      <p><strong>Worst-fit</strong> foi gastando o bloco grande: o maior bloco livre caiu para 16 KB, e um programa de 20 KB já não caberia.</p>`;
+  }
+  else{
+    T.textContent=`Modo livre · ${NAMES[strat]}`;S.textContent='Clique num programa na fita para terminá-lo';
+    setTapes([{mem:memL,opts:{newStart:lastL&&lastL.newStart,onClick:endProc}}]);setStats(memL);
+    L.innerHTML=`<h3>Criar programa</h3><form class="form" id="f"><div class="field"><label for="pname">Nome</label><input id="pname" maxlength="3"></div>
+      <div class="field"><label for="psize">Tamanho (KB)</label><input id="psize" type="number" min="1" max="50"></div>
+      <button class="btn primary" type="submit">Alocar</button><button class="btn" type="button" id="bR2">Recomeçar</button></form>
+      <p class="hint">Experimente alocar um programa maior que o maior bloco livre. Depois termine C e veja as áreas livres vizinhas se juntarem.</p>`+keysHtml('');
+    const pn=document.getElementById('pname'),ps=document.getElementById('psize');pn.value=nextName();ps.value=ps.value||'6';
+    document.getElementById('f').onsubmit=e=>{e.preventDefault();doAlloc(pn.value,ps.value);};
+    document.getElementById('bR2').onclick=()=>{memL=initial();lastL=null;msgL=null;render();};
+    if(msgL&&msgL.rows){R.innerHTML=`<h3>Como o ${NAMES[strat]} decidiu</h3>${table(msgL.rows,msgL.chosen,msgL.k)}<p class="verdict ${msgL.ok?'':'no'}">${msgL.text}</p>`;}
+    else if(msgL){R.innerHTML=`<h3>O que aconteceu</h3><p class="verdict ${msgL.ok?'':'no'}">${msgL.text}</p>`;}
+    else R.innerHTML=`<h3>Como o algoritmo decide</h3><p class="hint">Crie um programa à esquerda. Aqui aparece a lista de áreas livres que o ${NAMES[strat]} examinou e a escolha dele.</p>`;
+  }
+}
+function nextName(){for(let c=68;c<=90;c++){const n=String.fromCharCode(c);if(!memL.some(b=>b.proc===n))return n;}return 'X';}
+function doAlloc(nameRaw,sizeRaw){const name=(nameRaw||'').trim().toUpperCase(),size=parseInt(sizeRaw,10);
+  if(!name){msgL={ok:false,text:'Dê um nome ao programa, por exemplo F.'};return render();}
+  if(memL.some(b=>b.proc===name)){msgL={ok:false,text:`Já existe um programa ${name} na memória. Use outro nome.`};return render();}
+  if(!(size>0)){msgL={ok:false,text:'O tamanho precisa ser um número maior que zero.'};return render();}
+  const r=alloc(memL,name,size,strat);
+  if(r.ok){memL=r.mem;lastL=r;msgL={ok:true,rows:r.rows,chosen:r.chosen,k:size,text:why(r.rows,r.chosen,strat,size)};}
+  else{const st=stats(memL);lastL=null;msgL={ok:false,rows:r.rows,chosen:-1,k:size,text:`Não coube: nenhuma área livre tem ${size} KB.`+(st.total>=size?` Há ${st.total} KB livres no total, mas espalhados. Isso é fragmentação externa.`:'')};}
+  render();}
+function endProc(name){const r=release(memL,name);memL=r.mem;lastL=null;
+  msgL={ok:true,text:`Programa ${name} terminou.`+(r.joins?` A área dele se juntou com ${r.joins===1?'a área livre vizinha':'as áreas livres vizinhas'} (junção de áreas livres, seção 9.5.2).`:' Não havia área livre vizinha para juntar.')};render();}
+function go(d){const n=step+d;if(n>=0&&n<=OPS.length){step=n;render();}}
+
+document.getElementById('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;render();}});
+document.getElementById('seg').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.disabled){strat=b.dataset.s;render();}});
+document.addEventListener('keydown',e=>{
+  if(e.target.closest('input'))return;
+  const k=e.key.toLowerCase();
+  if(k==='1'||k==='2'||k==='3'){if(mode!=='comp'){strat=['first','best','worst'][+k-1];render();}}
+  else if(k==='arrowright'&&mode==='passo'){e.preventDefault();go(1);}
+  else if(k==='arrowleft'&&mode==='passo'){e.preventDefault();go(-1);}
+  else if(k==='r'&&mode==='passo'){step=0;render();}
+  else if(k==='p'){mode='passo';render();}else if(k==='c'){mode='comp';render();}else if(k==='l'){mode='livre';render();}
+  else if(k==='f'){const el=document.documentElement;try{if(!document.fullscreenElement){const p=el.requestFullscreen&&el.requestFullscreen();if(p&&p.catch)p.catch(()=>{});}else{document.exitFullscreen();}}catch(_){}}
+});
+render();
+</script>
+
+</body></html>

@@ -1,0 +1,372 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Simulador de Partições</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: uma coluna de leitura; a "fita" de memória é o elemento principal, com o raciocínio do algoritmo logo abaixo */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --ink:#18202b; --muted:#5b6676; --line:#d9dee6;
+  --accent:#2457c5; --accent-soft:#e3ebfb; --ok:#1f7a4d; --ok-soft:#dff3e8; --no:#b23a3a; --no-soft:#f8e3e3;
+  --free:#eef1f5; --hatch:#c9d0da; --so:#4a5566;
+  --p1:#3b6fd8; --p2:#d0782b; --p3:#2f9a7a; --p4:#9b59c9; --p5:#c94f7c; --p6:#6c8a1f;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161d; --surface:#18202a; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3644;
+  --accent:#7ea3ff; --accent-soft:#1f2c47; --ok:#5fcf98; --ok-soft:#173326; --no:#ff8a8a; --no-soft:#3a1d1d;
+  --free:#1d2530; --hatch:#334050; --so:#6b788a;
+  --p1:#5b8cf0; --p2:#e8964f; --p3:#4cc19e; --p4:#b884e0; --p5:#e27aa0; --p6:#97b84a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161d; --surface:#18202a; --ink:#e6ebf2; --muted:#9aa6b6; --line:#2c3644;
+  --accent:#7ea3ff; --accent-soft:#1f2c47; --ok:#5fcf98; --ok-soft:#173326; --no:#ff8a8a; --no-soft:#3a1d1d;
+  --free:#1d2530; --hatch:#334050; --so:#6b788a;
+  --p1:#5b8cf0; --p2:#e8964f; --p3:#4cc19e; --p4:#b884e0; --p5:#e27aa0; --p6:#97b84a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+.wrap{max-width:880px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:1.75rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.2rem;font-weight:600}
+p{margin:0;max-width:66ch}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+header{display:grid;gap:8px}
+.lead{color:var(--muted)}
+section{display:grid;gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:16px;min-width:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:500 .9rem var(--sans);border:0;background:transparent;color:var(--ink);padding:8px 14px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#0b1220}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#0b1220}}
+.btn{font:500 .9rem var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#0b1220}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#0b1220}}
+.btn:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.strategy-note{color:var(--muted);font-size:.9rem}
+/* memory tape */
+.tape-box{overflow-x:auto}
+.tape{display:flex;height:74px;border:1px solid var(--line);border-radius:6px;overflow:hidden;min-width:520px}
+.blk{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);font-size:.8rem;border-right:1px solid var(--surface);min-width:0;overflow:hidden;transition:flex-grow .35s}
+.blk:last-child{border-right:0}
+.blk b{font-weight:600;font-size:.85rem}
+.blk.free{color:var(--muted);background:repeating-linear-gradient(135deg,var(--free) 0 7px,var(--hatch) 7px 8px)}
+.blk.hl{outline:3px solid var(--accent);outline-offset:-3px}
+.blk.new{animation:pop .5s ease}
+@keyframes pop{from{filter:brightness(1.6)}to{filter:none}}
+@media (prefers-reduced-motion:reduce){.blk{transition:none}.blk.new{animation:none}}
+.ruler{position:relative;height:18px;min-width:520px;font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.ruler span{position:absolute;transform:translateX(-50%);top:2px}
+.ruler span:first-child{transform:none}
+.ruler span:last-child{transform:translateX(-100%)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.stat .k{font-size:.78rem;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:1.15rem;font-weight:600;font-variant-numeric:tabular-nums}
+/* reasoning */
+.think{display:grid;gap:10px}
+.think h3{font-size:1rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+.tbl{overflow-x:auto}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+tr.chosen td{background:var(--accent-soft);font-weight:600}
+.tag{display:inline-block;font-size:.75rem;padding:1px 8px;border-radius:99px;font-weight:600}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.no{background:var(--no-soft);color:var(--no)}
+.verdict{border-left:3px solid var(--accent);padding:6px 12px;background:var(--accent-soft);border-radius:0 6px 6px 0}
+.steps{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.steps li{display:flex;gap:10px;align-items:baseline;color:var(--muted);font-size:.92rem}
+.steps li .dot{font-family:var(--mono);font-size:.75rem;border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--muted);flex:none}
+.steps li.done{color:var(--ink)}
+.steps li.now{color:var(--ink);font-weight:600}
+.steps li.now .dot{background:var(--accent);border-color:var(--accent);color:#fff}
+/* free mode */
+.form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.field{display:grid;gap:4px}
+.field label{font-size:.8rem;color:var(--muted)}
+.field input{font:500 .95rem var(--mono);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:110px}
+.msg{font-size:.92rem;min-height:1.4em}
+.msg.no{color:var(--no)} .msg.ok{color:var(--ok)}
+.hint{font-size:.85rem;color:var(--muted)}
+/* compare */
+.cmp{display:grid;gap:14px}
+.cmp-row{display:grid;gap:6px}
+.cmp-row .t{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.9rem}
+.cmp-row .t span{color:var(--muted);font-family:var(--mono);font-size:.8rem}
+.cmp .tape{height:46px}
+pre{margin:0;font-family:var(--mono);font-size:.85rem;line-height:1.6;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+.kw{color:var(--accent);font-weight:600}
+.cm{color:var(--muted)}
+footer{color:var(--muted);font-size:.85rem}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Cap. 9 · Machado &amp; Maia · Alocação particionada dinâmica</div>
+    <h1>Simulador de Partições</h1>
+    <p class="lead">A memória é uma fita de 50 KB. Cada programa ocupa um pedaço contínuo dela. Quando chega um programa novo, o sistema olha a lista de áreas livres e escolhe uma, conforme a estratégia. É esse "escolher" que o nosso programa em C++ vai fazer.</p>
+  </header>
+
+  <section aria-labelledby="t1">
+    <h2 id="t1">1. Exercício 12 do livro, passo a passo</h2>
+    <p class="hint">Memória inicial do exercício 12 (seção 9.7): A 5 KB, B 3 KB, livre 10 KB, C 6 KB, livre 26 KB. Escolha a estratégia e avance os passos.</p>
+    <div class="panel">
+      <div class="row">
+        <div class="seg" role="group" aria-label="Estratégia" id="seg1">
+          <button id="s1-first" data-s="first" aria-pressed="true">First-fit</button>
+          <button id="s1-best" data-s="best" aria-pressed="false">Best-fit</button>
+          <button id="s1-worst" data-s="worst" aria-pressed="false">Worst-fit</button>
+        </div>
+        <span class="strategy-note" id="note1"></span>
+      </div>
+      <div class="tape-box"><div class="tape" id="tape1"></div><div class="ruler" id="ruler1"></div></div>
+      <ol class="steps" id="steps1"></ol>
+      <div class="row">
+        <button class="btn" id="back1">Voltar</button>
+        <button class="btn primary" id="next1">Próximo passo</button>
+        <button class="btn" id="reset1">Recomeçar</button>
+      </div>
+      <div class="think" id="think1"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t2">
+    <h2 id="t2">2. As três estratégias lado a lado</h2>
+    <p class="hint">O mesmo exercício, até o fim, com cada estratégia. Repare onde o programa E foi parar e no tamanho das sobras.</p>
+    <div class="panel cmp" id="cmp"></div>
+  </section>
+
+  <section aria-labelledby="t3">
+    <h2 id="t3">3. Modo livre</h2>
+    <p class="hint">Crie programas e clique num programa na fita para terminá-lo. Quando duas áreas livres ficam vizinhas, elas se juntam numa só (a "junção de áreas livres" da seção 9.5.2).</p>
+    <div class="panel">
+      <div class="row">
+        <div class="seg" role="group" aria-label="Estratégia do modo livre" id="seg2">
+          <button id="s2-first" data-s="first" aria-pressed="true">First-fit</button>
+          <button id="s2-best" data-s="best" aria-pressed="false">Best-fit</button>
+          <button id="s2-worst" data-s="worst" aria-pressed="false">Worst-fit</button>
+        </div>
+      </div>
+      <form class="form" id="form2">
+        <div class="field"><label for="pname">Programa</label><input id="pname" value="D" maxlength="3"></div>
+        <div class="field"><label for="psize">Tamanho (KB)</label><input id="psize" type="number" min="1" max="50" value="6"></div>
+        <button class="btn primary" type="submit" id="alloc2">Alocar</button>
+        <button class="btn" type="button" id="reset2">Recomeçar</button>
+      </form>
+      <div class="tape-box"><div class="tape" id="tape2"></div><div class="ruler" id="ruler2"></div></div>
+      <div class="msg" id="msg2" role="status"></div>
+      <div class="stats" id="stats2"></div>
+      <div class="think" id="think2"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t4">
+    <h2 id="t4">4. A mesma lógica em pseudocódigo</h2>
+    <p class="hint">Isto é o que o programa C++ vai fazer, só com o que você já viu nas listas: uma variável, um <code>para</code> e um <code>se</code>. A única diferença entre as três estratégias é a linha marcada.</p>
+    <pre><span class="cm">// procurar uma área livre para um programa de "pedido" KB</span>
+escolhida ← nenhuma
+<span class="kw">para</span> cada área da memória, do início ao fim:
+    <span class="kw">se</span> a área está livre <span class="kw">e</span> tamanho da área ≥ pedido:
+        <span class="cm">// First-fit : se escolhida = nenhuma           → escolhida ← área ; PARAR</span>
+        <span class="cm">// Best-fit  : se escolhida = nenhuma ou área MENOR que escolhida → escolhida ← área</span>
+        <span class="cm">// Worst-fit : se escolhida = nenhuma ou área MAIOR que escolhida → escolhida ← área</span>
+
+<span class="kw">se</span> escolhida = nenhuma:
+    mostrar "não cabe: programa espera na fila"
+<span class="kw">senão</span>:
+    programa ocupa o começo da área escolhida
+    o que sobrar vira uma nova área livre</pre>
+  </section>
+
+  <footer>Exercícios 11 e 12 da seção 9.7 de MACHADO, F. B.; MAIA, L. P. Arquitetura de sistemas operacionais. 4. ed. Rio de Janeiro: LTC, 2007.</footer>
+</div>
+
+<script>
+const TOTAL = 50;
+const COLORS = {A:'--p1',B:'--p2',C:'--p3',D:'--p4',E:'--p5'};
+const extra = ['--p6','--p1','--p2','--p3','--p4','--p5'];
+let extraI = 0;
+function colorOf(name){ if(!COLORS[name]){ COLORS[name]=extra[extraI++ % extra.length]; } return 'var('+COLORS[name]+')'; }
+const NOTES = {
+  first:'Pega a primeira área livre em que o programa cabe. É a mais rápida.',
+  best:'Pega a menor área livre em que o programa cabe. Sobra pouco, mas sobram migalhas.',
+  worst:'Pega a maior área livre. A sobra é grande e ainda serve para outro programa.'
+};
+const NAMES = {first:'First-fit',best:'Best-fit',worst:'Worst-fit'};
+
+function initial(){ return [
+  {start:0,size:5,proc:'A'},{start:5,size:3,proc:'B'},{start:8,size:10,proc:null},
+  {start:18,size:6,proc:'C'},{start:24,size:26,proc:null}]; }
+const clone = m => m.map(b=>({...b}));
+
+function choose(mem, size, s){
+  const rows=[]; let chosen=-1;
+  mem.forEach((b,i)=>{
+    if(b.proc) return;
+    const fits = b.size>=size;
+    rows.push({i,start:b.start,size:b.size,fits,left:b.size-size});
+    if(!fits) return;
+    if(s==='first'){ if(chosen<0) chosen=i; }
+    else if(chosen<0 || (s==='best'? b.size<mem[chosen].size : b.size>mem[chosen].size)) chosen=i;
+  });
+  return {rows,chosen};
+}
+function alloc(mem, name, size, s){
+  const {rows,chosen}=choose(mem,size,s);
+  if(chosen<0) return {mem,rows,chosen,ok:false};
+  const b=mem[chosen]; const out=clone(mem);
+  const parts=[{start:b.start,size:size,proc:name}];
+  if(b.size>size) parts.push({start:b.start+size,size:b.size-size,proc:null});
+  out.splice(chosen,1,...parts);
+  return {mem:out,rows,chosen,ok:true,newStart:b.start};
+}
+function release(mem, name){
+  let out=clone(mem).map(b=>b.proc===name?{...b,proc:null}:b);
+  const merged=[]; let joins=0;
+  for(const b of out){
+    const last=merged[merged.length-1];
+    if(last && !last.proc && !b.proc){ last.size+=b.size; joins++; } else merged.push({...b});
+  }
+  return {mem:merged,joins};
+}
+function stats(mem){
+  const free=mem.filter(b=>!b.proc);
+  return {total:free.reduce((a,b)=>a+b.size,0),areas:free.length,maior:free.reduce((a,b)=>Math.max(a,b.size),0)};
+}
+
+function drawTape(el, mem, opts={}){
+  el.innerHTML='';
+  mem.forEach((b,i)=>{
+    const d=document.createElement('div');
+    d.className='blk'+(b.proc?'':' free')+(opts.hl===b.start?' hl':'')+(opts.newStart===b.start&&b.proc?' new':'');
+    d.style.flexGrow=b.size; d.style.flexBasis='0';
+    if(b.proc){ d.style.background=colorOf(b.proc); }
+    d.innerHTML = b.proc ? `<b>${b.proc}</b><span>${b.size}K</span>` : `<span>livre</span><span>${b.size}K</span>`;
+    d.title = (b.proc?('Programa '+b.proc):'Área livre')+` · início ${b.start} KB · ${b.size} KB`;
+    if(opts.onClick && b.proc){ d.style.cursor='pointer'; d.tabIndex=0; d.setAttribute('role','button');
+      d.setAttribute('aria-label','Terminar programa '+b.proc);
+      d.addEventListener('click',()=>opts.onClick(b.proc));
+      d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();opts.onClick(b.proc);}}); }
+    el.appendChild(d);
+  });
+}
+function drawRuler(el, mem){
+  el.innerHTML='';
+  const marks=new Set([0,TOTAL]); mem.forEach(b=>marks.add(b.start));
+  [...marks].sort((a,b)=>a-b).forEach(m=>{ const s=document.createElement('span'); s.style.left=(m/TOTAL*100)+'%'; s.textContent=m; el.appendChild(s); });
+}
+function reasoningTable(rows, chosen, size, s){
+  if(!rows.length) return '<p>Não há nenhuma área livre.</p>';
+  let h='<div class="tbl"><table><thead><tr><th>Área livre</th><th>Início</th><th>Tamanho</th><th>Cabe '+size+'K?</th><th>Sobraria</th></tr></thead><tbody>';
+  rows.forEach((r,k)=>{
+    h+=`<tr class="${r.i===chosen?'chosen':''}"><td>${k+1}${r.i===chosen?' ← escolhida':''}</td><td class="n">${r.start} KB</td><td class="n">${r.size} KB</td><td>${r.fits?'<span class="tag ok">cabe</span>':'<span class="tag no">não cabe</span>'}</td><td class="n">${r.fits?r.left+' KB':'—'}</td></tr>`;
+  });
+  return h+'</tbody></table></div>';
+}
+function why(rows, chosen, s, size){
+  const fit=rows.filter(r=>r.fits);
+  if(chosen<0) return `Nenhuma área livre tem ${size} KB ou mais. O programa espera na fila.`;
+  const c=rows.find(r=>r.i===chosen);
+  if(s==='first') return `First-fit para na primeira área que cabe: a que começa em ${c.start} KB (${c.size} KB).`;
+  if(s==='best') return `Best-fit olhou as ${fit.length} áreas que cabem e pegou a menor: ${c.size} KB, em ${c.start} KB. Sobram ${c.left} KB.`;
+  return `Worst-fit olhou as ${fit.length} áreas que cabem e pegou a maior: ${c.size} KB, em ${c.start} KB. Sobram ${c.left} KB, que ainda servem para outro programa.`;
+}
+
+/* ---------- 1. passo a passo ---------- */
+const OPS=[{t:'alloc',n:'D',k:6,label:'Alocar o programa D (6 KB)'},{t:'free',n:'A',label:'Liberar a área do programa A'},{t:'alloc',n:'E',k:4,label:'Alocar o programa E (4 KB)'}];
+let s1='first', step=0;
+function runTo(s, upto){
+  let mem=initial(), last=null;
+  for(let i=0;i<upto;i++){
+    const op=OPS[i];
+    if(op.t==='alloc'){ const r=alloc(mem,op.n,op.k,s); last={op,...r,prev:mem}; mem=r.mem; }
+    else { const r=release(mem,op.n); last={op,joins:r.joins,prev:mem}; mem=r.mem; }
+  }
+  return {mem,last};
+}
+function render1(){
+  document.querySelectorAll('#seg1 button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===s1));
+  document.getElementById('note1').textContent=NOTES[s1];
+  const {mem,last}=runTo(s1,step);
+  drawTape(document.getElementById('tape1'),mem,{newStart:last&&last.newStart});
+  drawRuler(document.getElementById('ruler1'),mem);
+  const ul=document.getElementById('steps1');
+  ul.innerHTML='<li class="'+(step===0?'now':'done')+'"><span class="dot">0</span>Estado inicial do exercício</li>'+
+    OPS.map((o,i)=>`<li class="${i+1===step?'now':(i+1<step?'done':'')}"><span class="dot">${String.fromCharCode(97+i)}</span>${o.label}</li>`).join('');
+  document.getElementById('back1').disabled=step===0;
+  document.getElementById('next1').disabled=step===OPS.length;
+  const th=document.getElementById('think1');
+  if(!last){ th.innerHTML='<p class="hint">Aperte "Próximo passo" para ver o algoritmo escolher uma área.</p>'; return; }
+  if(last.op.t==='alloc'){
+    th.innerHTML=`<h3>Como o ${NAMES[s1]} decidiu</h3>${reasoningTable(last.rows,last.chosen,last.op.k,s1)}<p class="verdict">${why(last.rows,last.chosen,s1,last.op.k)}</p>`;
+  } else {
+    th.innerHTML=`<h3>O que aconteceu</h3><p class="verdict">A área do programa A (5 KB, no início da memória) voltou a ficar livre. ${last.joins?'Ela encostou noutra área livre e as duas viraram uma só.':'Ao lado dela está o programa B, ocupado, então não houve junção: ela fica como uma área livre separada.'}</p>`;
+  }
+}
+document.getElementById('seg1').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return; s1=b.dataset.s; render1();});
+document.getElementById('next1').addEventListener('click',()=>{if(step<OPS.length){step++;render1();}});
+document.getElementById('back1').addEventListener('click',()=>{if(step>0){step--;render1();}});
+document.getElementById('reset1').addEventListener('click',()=>{step=0;render1();});
+
+/* ---------- 2. comparação ---------- */
+function renderCmp(){
+  const box=document.getElementById('cmp'); box.innerHTML='';
+  ['first','best','worst'].forEach(s=>{
+    const {mem}=runTo(s,OPS.length); const st=stats(mem); const e=mem.find(b=>b.proc==='E');
+    const row=document.createElement('div'); row.className='cmp-row';
+    row.innerHTML=`<div class="t"><strong>${NAMES[s]}</strong><span>E em ${e.start} KB · ${st.areas} áreas livres · maior bloco ${st.maior} KB</span></div><div class="tape-box"><div class="tape"></div></div>`;
+    box.appendChild(row); drawTape(row.querySelector('.tape'),mem,{hl:e.start});
+  });
+  const p=document.createElement('p'); p.className='hint';
+  p.textContent='Nos três casos sobram os mesmos 31 KB livres. O que muda é como eles ficam espalhados (a fragmentação externa). O First-fit deixou uma migalha de 1 KB que quase nada aproveita. O Best-fit encaixou E num buraco de 4 KB exato e preservou o bloco grande de 26 KB. O Worst-fit foi gastando o bloco grande: o maior bloco livre caiu para 16 KB, e um programa de 20 KB já não caberia.';
+  box.appendChild(p);
+}
+
+/* ---------- 3. modo livre ---------- */
+let s2='first', mem2=initial(), last2=null;
+function render2(){
+  document.querySelectorAll('#seg2 button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===s2));
+  drawTape(document.getElementById('tape2'),mem2,{newStart:last2&&last2.newStart,onClick:endProc});
+  drawRuler(document.getElementById('ruler2'),mem2);
+  const st=stats(mem2);
+  document.getElementById('stats2').innerHTML=
+    `<div class="stat"><div class="k">Memória livre total</div><div class="v">${st.total} KB</div></div>`+
+    `<div class="stat"><div class="k">Áreas livres</div><div class="v">${st.areas}</div></div>`+
+    `<div class="stat"><div class="k">Maior bloco livre</div><div class="v">${st.maior} KB</div></div>`;
+  const th=document.getElementById('think2');
+  th.innerHTML = last2 && last2.rows ? `<h3>Como o ${NAMES[s2]} decidiu</h3>${reasoningTable(last2.rows,last2.chosen,last2.k,s2)}` : '';
+}
+function endProc(name){
+  const r=release(mem2,name); mem2=r.mem; last2=null;
+  const m=document.getElementById('msg2'); m.className='msg ok';
+  m.textContent=`Programa ${name} terminou.`+(r.joins?` A área dele se juntou com ${r.joins===1?'a área livre vizinha':'as áreas livres vizinhas'}.`:' Nenhuma área livre vizinha para juntar.');
+  render2();
+}
+document.getElementById('seg2').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return; s2=b.dataset.s; render2();});
+document.getElementById('form2').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=(document.getElementById('pname').value||'').trim().toUpperCase();
+  const size=parseInt(document.getElementById('psize').value,10);
+  const m=document.getElementById('msg2');
+  if(!name){m.className='msg no';m.textContent='Dê um nome ao programa, por exemplo F.';return;}
+  if(mem2.some(b=>b.proc===name)){m.className='msg no';m.textContent=`Já existe um programa ${name} na memória. Use outro nome.`;return;}
+  if(!(size>0)){m.className='msg no';m.textContent='O tamanho precisa ser um número maior que zero.';return;}
+  const r=alloc(mem2,name,size,s2); last2={...r,k:size};
+  if(r.ok){ mem2=r.mem; m.className='msg ok'; m.textContent=why(r.rows,r.chosen,s2,size);
+    const nx=String.fromCharCode(Math.min(90,name.charCodeAt(0)+1)); document.getElementById('pname').value=nx; }
+  else { const st=stats(mem2); m.className='msg no';
+    m.textContent=`Não coube: nenhuma área livre tem ${size} KB.`+(st.total>=size?` Repare: há ${st.total} KB livres no total, mas espalhados. Isso é fragmentação externa.`:''); }
+  render2();
+});
+document.getElementById('reset2').addEventListener('click',()=>{mem2=initial();last2=null;document.getElementById('msg2').textContent='';document.getElementById('pname').value='D';render2();});
+
+render1(); renderCmp(); render2();
+</script>
+
+</body></html>
