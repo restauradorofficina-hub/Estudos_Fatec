@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de Partições</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: projeção em sala. Cabeçalho com os modos; no centro, fila | memória vertical (como nas figuras do livro) | painel do modo; embaixo, explicação, contadores e controles. Tema claro único, de propósito. */
+:root{
+  color-scheme:light;
+  --bg:#f2f2f0; --paper:#ffffff; --ink:#111111; --ink2:#4a4a4a; --rule:#c9c9c4; --so:#8c8c8c;
+  --A:#2E75B6; --B:#548235; --C:#C55A11; --D:#7030A0; --E:#BF8F00;
+  --waste:#c00000; --mark:#111111; --hl:#FFC000;
+  --sans:"Segoe UI",Arial,Helvetica,sans-serif;
+  --mono:Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:21px;line-height:1.35;overflow:hidden}
+/* palco fixo 1600x900 (16:9), escalado por script para caber inteiro em qualquer tela */
+.app{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;display:grid;grid-template-rows:auto 1fr auto;gap:12px;
+  padding:14px 22px;background:var(--bg)}
+button,select{font:inherit;cursor:pointer;color:var(--ink);background:var(--paper)}
+button:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+/* header */
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;border-bottom:2px solid var(--ink);padding-bottom:12px}
+header h1{font-size:1.15em;margin:0;font-weight:700;letter-spacing:.01em;margin-right:6px}
+header h1 small{display:block;font-size:.62em;font-weight:400;color:var(--ink2)}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.modes button{border:2px solid var(--ink);background:var(--paper);color:var(--ink);padding:.28em .7em .36em;border-radius:0;font-size:.85em;display:flex;flex-direction:column;align-items:flex-start;text-align:left;line-height:1.15}
+.modes button .d,.sub button .d{font-size:.66em;color:var(--ink2);font-weight:400;white-space:nowrap}
+.modes button:hover,.sub button:hover,.ctrls button:hover:not(:disabled){background:#e4e4df}
+.modes button[aria-pressed="true"],.modes button[aria-pressed="true"]:hover{background:var(--ink);color:#fff;font-weight:700;box-shadow:0 6px 0 0 var(--hl)}
+.modes button[aria-pressed="true"] .d,.sub button[aria-pressed="true"] .d{color:#e8e8e8}
+.modes button .k{font-family:var(--mono);font-size:.8em;opacity:.7;margin-right:.3em}
+.sub{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.sub[hidden]{display:none!important}
+.sub button{border:2px solid var(--ink);background:var(--paper);padding:.18em .6em .26em;border-radius:0;font-size:.8em;display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+.sub button[aria-pressed="true"],.sub button[aria-pressed="true"]:hover{background:var(--ink);color:#fff;font-weight:700;box-shadow:0 5px 0 0 var(--hl)}
+/* stage */
+.stage{display:grid;grid-template-columns:1fr 600px 1fr;gap:28px;min-height:0;align-items:stretch;justify-content:center;width:100%}
+.stage.cmp{grid-template-columns:repeat(3,420px);gap:48px;justify-content:center}
+.col{display:flex;flex-direction:column;min-height:0;min-width:0}
+.col h2{font-size:.8em;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;color:var(--ink2);font-weight:700}
+.colbody{flex:1;min-height:0;position:relative}
+/* memory */
+.memwrap{display:grid;grid-template-columns:3.2em 1fr;height:100%;min-height:0;padding-right:var(--pr,0)}
+.memwrap.parted{--pr:6.5em}
+.addr{position:relative;font-family:var(--mono);font-size:.72em;color:var(--ink2)}
+.addr span{position:absolute;right:6px;transform:translateY(-50%);white-space:nowrap}
+.mem{position:relative;border:2px solid var(--ink);background:var(--paper);height:100%}
+.blk{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:.5em;border-top:2px solid var(--ink);overflow:hidden;text-align:center;line-height:1.1}
+.blk:first-child{border-top:0}
+.blk.so{background:var(--so);color:#fff;font-weight:600}
+.blk.free{background:#fff;color:var(--ink2);outline:2px dashed #7d7d7d;outline-offset:-6px}
+.blk.free .t{font-size:.85em}
+.proc{color:#fff;font-weight:700}
+.proc .L{font-size:1.25em}
+.proc .S{font-family:var(--mono);font-size:.95em;font-weight:600}
+.proc .N{font-size:.72em;font-weight:600;opacity:.95}
+.proc.dark{color:#111}
+.tag{font-size:.62em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:#fff;color:#111;padding:0 .35em;border:1px solid #111}
+/* partitions */
+.part{position:absolute;left:0;right:0;border-top:2px solid var(--ink)}
+.part:first-child{border-top:0}
+.part .plabel{position:absolute;right:calc(100% + 3.6em);top:50%;transform:translateY(-50%)}
+.part .occ{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;justify-content:center;gap:.5em}
+.part .waste{position:absolute;left:0;right:0;bottom:0;background:repeating-linear-gradient(135deg,#fff 0 6px,#f3c9c9 6px 9px);border-top:2px solid var(--waste);color:var(--waste);font-weight:700;font-size:.75em;display:flex;align-items:center;justify-content:center}
+.part .pfree{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink2);outline:2px dashed #7d7d7d;outline-offset:-6px;font-size:.85em}
+.pname{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);font-size:.8em;white-space:nowrap;font-weight:700}
+.pname small{display:block;font-weight:400;font-family:var(--mono);color:var(--ink2)}
+/* highlight */
+.scan{box-shadow:inset 0 0 0 5px var(--mark)}
+.scan::after{content:"examinando";position:absolute;top:2px;right:4px;font-size:.6em;font-weight:700;background:#111;color:#fff;padding:0 .3em}
+.chosen{box-shadow:inset 0 0 0 6px var(--mark)}
+.chosen::after{content:"escolhida";position:absolute;top:2px;right:4px;font-size:.6em;font-weight:700;background:#111;color:#fff;padding:0 .3em}
+.target{outline:4px dashed var(--mark)!important;outline-offset:-8px!important;background:repeating-linear-gradient(135deg,#fff 0 10px,#fff4cc 10px 14px)!important}
+.target::after{content:attr(data-tlabel);position:absolute;top:4px;right:6px;font-size:.62em;font-weight:700;background:var(--hl);color:#111;padding:0 .35em;border:1px solid #111}
+.nofit::after{content:"não cabe";position:absolute;top:2px;right:4px;font-size:.6em;font-weight:700;background:var(--waste);color:#fff;padding:0 .3em}
+/* queue */
+.queue{display:flex;flex-direction:column;gap:1.5em;align-items:flex-end;height:100%;overflow:hidden;padding-top:1.2em;padding-right:4px}
+.qrow{position:absolute;left:0;right:0;display:flex;gap:6px;align-items:center;justify-content:flex-end;padding-right:4px}
+.qrow .arrow{font-size:1.2em;color:var(--ink2)}
+.card{display:flex;align-items:center;gap:.45em;padding:.25em .55em;min-width:4.6em;justify-content:center;border:2px solid #111;position:relative}
+.card .L{font-size:1.15em}
+.card.wait{outline:3px solid var(--waste);outline-offset:2px}
+.card .w{position:absolute;bottom:calc(100% + 2px);right:-2px;font-size:.58em;background:var(--waste);color:#fff;padding:0 .3em;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.empty{color:var(--ink2);font-size:.85em;font-style:italic}
+/* side */
+.side{display:flex;flex-direction:column;gap:12px;font-size:.88em}
+.box{border:2px solid var(--ink);background:var(--paper);padding:8px 10px}
+.box h3{margin:0 0 6px;font-size:.85em;text-transform:uppercase;letter-spacing:.06em}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--rule);padding:3px 6px;text-align:left;font-variant-numeric:tabular-nums}
+th{font-size:.78em;text-transform:uppercase;color:var(--ink2)}
+td.n{font-family:var(--mono)}
+.disk{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.disk svg{width:64px;height:auto}
+.diskcards{display:flex;flex-wrap:wrap;gap:6px;min-height:2.4em}
+.legend{display:grid;gap:4px;font-size:.85em}
+.legend i{display:inline-block;width:1.4em;height:.9em;vertical-align:middle;margin-right:.4em;border:1px solid #111}
+.reg{font-family:var(--mono);font-size:.95em}
+.reg b{font-size:1.2em}
+.note{font-size:.8em;color:var(--ink2)}
+/* bottom */
+.bottom{display:grid;gap:10px;width:100%}
+.msg{background:var(--paper);border:2px solid var(--ink);border-left:10px solid var(--ink);padding:.45em .8em;font-size:1.05em;min-height:2.9em;display:flex;align-items:center;gap:.8em}
+.msg .step{font-family:var(--mono);font-size:.75em;background:#111;color:#fff;padding:.1em .4em;white-space:nowrap}
+.bar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}
+.counters{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.9em}
+.counters div b{font-family:var(--mono);font-size:1.1em}
+.counters .bad b{color:var(--waste)}
+.ctrls{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ctrls button{border:2px solid var(--ink);background:var(--paper);color:var(--ink);padding:.22em .75em .28em;border-radius:0;display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;text-align:left}
+.ctrls button .d{font-size:.6em;font-weight:400;opacity:.85;white-space:nowrap}
+.ctrls button.pri,.ctrls button.pri:hover:not(:disabled){background:var(--ink);color:#fff}
+.ctrls button:disabled{opacity:.3;cursor:default}
+.ctrls .kb{font-family:var(--mono);font-size:.62em;border:1px solid currentColor;padding:0 .3em;margin-left:.45em;vertical-align:.15em;opacity:.75}
+.ctrls button[aria-pressed="true"],.ctrls button[aria-pressed="true"]:hover{background:var(--hl);color:#111;font-weight:700}
+#anim{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.ctrls select{font:inherit;font-size:.85em;border:2px solid var(--ink);background:#fff;padding:.25em}
+.ctrls label{font-size:.85em;display:flex;gap:4px;align-items:center}
+.cstat{font-size:.85em;margin-top:6px;text-align:center}.cstat b{font-family:var(--mono)}
+.disclaimer{font-size:.8em;background:#111;color:#fff;padding:.2em .6em;align-self:flex-start}
+@media (max-width:820px){
+  html,body{height:auto}body{overflow:auto;font-size:16px}.app{position:static;width:auto;height:auto;transform:none!important;padding:10px 16px}
+  .stage,.stage.cmp{grid-template-columns:1fr;gap:16px}
+  .colbody{height:420px;flex:none}
+  .part .plabel{display:none}
+}
+</style>
+</head><body>
+
+<div class="app">
+  <header>
+    <h1>Simulador de Partições<small>Cap. 9 · Gerência de Memória · Machado &amp; Maia</small></h1>
+    <nav class="modes" id="modes" aria-label="Modos">
+      <button id="m1" data-m="m1" title="Partição fixa com código absoluto"><span><span class="k">1</span>Fixa absoluta</span><span class="d">uma fila por partição</span></button>
+      <button id="m2" data-m="m2" title="Partição fixa com código relocável"><span><span class="k">2</span>Fixa relocável</span><span class="d">fila única · fragm. interna</span></button>
+      <button id="m3" data-m="m3" title="Alocação particionada dinâmica"><span><span class="k">3</span>Dinâmica</span><span class="d">fragm. externa · compactação</span></button>
+      <button id="m4" data-m="m4" title="First-fit, Best-fit e Worst-fit no exercício 12"><span><span class="k">4</span>Estratégias</span><span class="d">first · best · worst-fit</span></button>
+      <button id="m5" data-m="m5" title="Swap out, swap in e relocação dinâmica"><span><span class="k">5</span>Swapping</span><span class="d">disco · relocação</span></button>
+      <button id="m6" data-m="m6" title="Cenário de 64 KB com programas da época"><span><span class="k">N</span>Nomes reais</span><span class="d">programas da época · 64 KB</span></button>
+    </nav>
+    <div class="sub" id="strat" hidden>
+      <button id="s-first" data-s="first"><span>First-fit</span><span class="d">a 1ª área que cabe</span></button>
+      <button id="s-best" data-s="best"><span>Best-fit</span><span class="d">a menor área que cabe</span></button>
+      <button id="s-worst" data-s="worst"><span>Worst-fit</span><span class="d">a maior área</span></button>
+      <button id="s-cmp" data-s="cmp"><span>Comparar as 3</span><span class="d">lado a lado · tecla C</span></button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage"></main>
+
+  <div class="bottom">
+    <div class="msg" role="status" aria-live="polite"><span class="step" id="stepn"></span><span id="msg"></span></div>
+    <div class="bar">
+      <div class="counters" id="counters"></div>
+      <div class="ctrls">
+        <button id="bBack" title="Volta um passo (seta esquerda)"><span>◀ Voltar<span class="kb">←</span></span><span class="d">passo anterior</span></button>
+        <button id="bNext" class="pri" title="Avança um passo (seta direita)"><span>Próximo ▶<span class="kb">→</span></span><span class="d">próximo passo</span></button>
+        <button id="bPlay" title="Avança sozinho (espaço)" aria-pressed="false"><span>▶ Reproduzir<span class="kb">espaço</span></span><span class="d">avança sozinho</span></button>
+        <select id="speed" aria-label="Velocidade" title="Velocidade do Reproduzir"><option value="3200">Lenta</option><option value="2200" selected>Normal</option><option value="1300">Rápida</option></select>
+        <button id="bReset" title="Volta ao passo 1 (R)"><span>⟲ Recomeçar<span class="kb">R</span></span><span class="d">volta ao passo 1</span></button>
+        <input type="checkbox" id="anim" checked aria-hidden="true" tabindex="-1"><button id="bAnim" aria-pressed="true" title="Liga ou desliga os movimentos (A)"><span>Animação: ligada<span class="kb">A</span></span><span class="d">blocos deslizando</span></button>
+        <button id="bFull" title="Ocupa a tela toda (F)" aria-pressed="false"><span>⛶ Tela cheia<span class="kb">F</span></span><span class="d">ocupa a TV inteira</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- programas ---------------- */
+const PROG = {
+  A:{L:'A',c:'--A'}, B:{L:'B',c:'--B'}, C:{L:'C',c:'--C'}, D:{L:'D',c:'--D'}, E:{L:'E',c:'--E',dark:true},
+  SI:{L:'Space Invaders',c:'--A',real:'fliperama, 1978'}, PM:{L:'Pac-Man',c:'--E',dark:true,real:'fliperama, 1980'},
+  AT:{L:'Pitfall!',c:'--C',real:'Atari 2600, 1982'}, MB:{L:'Super Mario Bros.',c:'--D',real:'NES, 1985'},
+  TP:{L:'Turbo Pascal 1.0',c:'--B',real:'1983'}
+};
+const sizeOf = {};
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* ---------------- memória dinâmica: helpers ---------------- */
+function dynFree(mem){return mem.filter(b=>!b.p);}
+function choose(mem,size,s){
+  const scan=[];let c=-1;
+  mem.forEach((b,i)=>{ if(b.p) return; scan.push(b.s); if(b.z<size) return;
+    if(s==='first'){ if(c<0) c=i; }
+    else if(c<0 || (s==='best'? b.z<mem[c].z : b.z>mem[c].z)) c=i; });
+  if(s==='first' && c>=0){ const k=scan.indexOf(mem[c].s); scan.length=k+1; }
+  return {scan, idx:c};
+}
+function place(mem,idx,p,size){
+  const b=mem[idx], out=clone(mem); const parts=[{s:b.s,z:size,p}];
+  if(b.z>size) parts.push({s:b.s+size,z:b.z-size,p:null});
+  out.splice(idx,1,...parts); return out;
+}
+function release(mem,p){
+  const m=clone(mem).map(b=>b.p===p?{...b,p:null,st:undefined}:b); const r=[]; let j=0;
+  for(const b of m){const l=r[r.length-1]; if(l&&!l.p&&!b.p){l.z+=b.z;j++;} else r.push(b);} return {mem:r,joins:j};
+}
+function compact(mem,total){
+  let a=0; const out=[]; mem.filter(b=>b.p).forEach(b=>{out.push({...b,s:a}); a+=b.z;});
+  if(a<total) out.push({s:a,z:total-a,p:null}); return out;
+}
+const kb = n => n+' KB';
+
+/* ---------------- cenários ---------------- */
+function scenM1(){
+  const S=[]; const parts=[{z:2,p:null},{z:5,p:null},{z:8,p:null}];
+  let q=[['A','C'],['B','E'],['D']]; Object.assign(sizeOf,{A:2,B:4,C:1,D:6,E:3});
+  const push=(msg,extra={})=>S.push({kind:'part',parts:clone(parts),queues:clone(q),msg,...extra});
+  push('Partição fixa absoluta: o código de cada programa tem endereços fixos, então ele só roda na partição para a qual foi compilado. Cada partição tem a sua fila.');
+  parts[0].p='A'; q[0]=['C']; push('A (2 KB) entra na partição 1, a única onde pode rodar.',{moved:'A'});
+  parts[1].p='B'; q[1]=['E']; push('B (4 KB) entra na partição 2.',{moved:'B'});
+  parts[2].p='D'; q[2]=[]; push('D (6 KB) entra na partição 3.',{moved:'D'});
+  parts[2].p=null; push('D terminou. A partição 3 (8 KB) ficou livre.');
+  push('C (1 KB) e E (3 KB) cabem com folga nos 8 KB livres da partição 3, mas foram compilados para as partições 1 e 2. Continuam esperando.',{wait:['C','E'],hl:[2]});
+  parts[0].p=null; push('A terminou e liberou a partição 1.');
+  parts[0].p='C'; q[0]=[]; push('C finalmente entra na partição 1, a dele.',{moved:'C'});
+  parts[1].p=null; parts[1].p='E'; q[1]=[]; push('B terminou; E entra na partição 2. A partição 3 ficou ociosa o tempo todo em que C e E esperavam.',{moved:'E'});
+  push('Além disso, C ocupa 1 de 2 KB e E ocupa 3 de 5 KB: as sobras dentro das partições (hachurado) são a fragmentação interna. Exemplo real: OS/MFT da IBM.');
+  return S;
+}
+function scenM2(){
+  const S=[]; const parts=[{z:2,p:null},{z:5,p:null},{z:8,p:null}];
+  let q=['C','A','E','B','D']; Object.assign(sizeOf,{A:2,B:4,C:1,D:6,E:3});
+  const push=(msg,extra={})=>S.push({kind:'part',parts:clone(parts),queue:clone(q),msg,table:true,...extra});
+  push('Partição fixa relocável: o código é relocável, então o programa pode ir para qualquer partição livre onde caiba. Há uma fila só.');
+  parts[0].p='C'; q.shift(); push('C (1 KB) vai para a primeira partição livre onde cabe: a partição 1 (2 KB). O SO marca a partição como ocupada na tabela.',{moved:'C',hl:[0]});
+  parts[1].p='A'; q.shift(); push('A (2 KB) vai para a partição 2, porque a 1 está ocupada. Com código absoluto, A só poderia usar a partição 1.',{moved:'A',hl:[1]});
+  parts[2].p='E'; q.shift(); push('E (3 KB) vai para a partição 3. Com código absoluto isso seria impossível: o loader recalcula os endereços de E para o novo início.',{moved:'E',hl:[2]});
+  push('B (4 KB) é o próximo, mas as três partições estão ocupadas. B espera.',{wait:['B']});
+  push('D (6 KB) também espera. Somando as sobras há 1 + 3 + 5 = 9 KB livres, mas presos dentro das partições ocupadas: fragmentação interna (Figura 3 do relatório).',{wait:['B','D']});
+  return S;
+}
+function scenM3(){
+  const S=[]; const T=20; Object.assign(sizeOf,{A:4,B:2,C:5,E:6,D:6});
+  let mem=[{s:0,z:T,p:null}], q=['A','B','C','E'];
+  const push=(msg,extra={})=>S.push({kind:'dyn',total:T,mem:clone(mem),queue:clone(q),msg,...extra});
+  push('Alocação dinâmica: não existem partições fixas. Cada programa ocupa só o que precisa, então não há fragmentação interna.');
+  for(const p of ['A','B','C','E']){ const r=choose(mem,sizeOf[p],'first'); const before=clone(mem); mem=place(mem,r.idx,p,sizeOf[p]); q.shift();
+    push(`${p} (${sizeOf[p]} KB) ocupa exatamente ${sizeOf[p]} KB, a partir do endereço ${before[r.idx].s} KB.`,{moved:p,scan:r.scan,chosen:before[r.idx].s,before}); }
+  mem=release(mem,'A').mem; push('A terminou: ficou uma área livre de 4 KB no início.');
+  mem=release(mem,'C').mem; push('C terminou: mais uma área livre, de 5 KB, entre B e E.');
+  q=['D']; const r=choose(mem,6,'first'); push('D (6 KB) chega. Há 4 + 5 + 3 = 12 KB livres, mas nenhum pedaço tem 6 KB. Isso é fragmentação externa.',{scan:r.scan,nofit:true,before:clone(mem),wait:['D']});
+  mem=compact(mem,T); push('Solução 1, compactação: o SO move B e E para o início (relocação). Os 12 KB livres viram um bloco só.',{wait:['D']});
+  const r2=choose(mem,6,'first'); const b2=clone(mem); mem=place(mem,r2.idx,'D',6); q=[]; push('Agora D cabe: entra no bloco de 12 KB e sobram 6 KB.',{moved:'D',scan:r2.scan,chosen:b2[r2.idx].s,before:b2});
+  const rr=release(mem,'D'); mem=rr.mem; push('Solução 2, junção de áreas livres: quando D termina, a área dele encosta na área livre vizinha e as duas viram uma só, de 12 KB, sem mover nenhum programa.');
+  return S;
+}
+function scenM4(s){
+  const S=[]; const T=50; Object.assign(sizeOf,{A:5,B:3,C:6,D:6,E:4});
+  let mem=[{s:0,z:5,p:'A'},{s:5,z:3,p:'B'},{s:8,z:10,p:null},{s:18,z:6,p:'C'},{s:24,z:26,p:null}], q=['D','E'];
+  const N={first:'First-fit',best:'Best-fit',worst:'Worst-fit'}, RULE={first:'pega a primeira área livre onde o programa cabe',best:'pega a menor área livre onde o programa cabe',worst:'pega a maior área livre'};
+  const push=(msg,extra={})=>S.push({kind:'dyn',total:T,mem:clone(mem),queue:clone(q),msg,...extra});
+  const prev=(p,z)=>{ const r=choose(mem,z,s), c=mem[r.idx]; return {pv:{p,start:c.s}, txt:`${N[s]} ${RULE[s]}: ${p} (${z} KB) vai para o bloco de ${c.z} KB, em ${c.s} KB (contorno tracejado).`}; };
+  const same=(z,m)=>{ const a=choose(m,z,'first').idx, b=choose(m,z,'best').idx; return a===b; };
+  let pr=prev('D',6);
+  push(`Exercício 12 (seção 9.7). ${pr.txt}`,{preview:pr.pv});
+  const why=(p,z,m,idx,sc)=>{const c=m[idx]; const fits=sc.filter(a=>m.find(b=>b.s===a).z>=z).length;
+    let t;
+    if(s==='first') t=`${N[s]} escolheu o bloco de ${c.z} KB (em ${c.s}) porque é o primeiro onde ${p} cabe. Sobram ${c.z-z} KB.`;
+    else if(s==='best') t=`${N[s]} comparou ${fits} blocos onde ${p} cabe e escolheu o de ${c.z} KB (em ${c.s}) porque é o menor. Sobram ${c.z-z} KB.`;
+    else t=`${N[s]} comparou ${fits} blocos onde ${p} cabe e escolheu o de ${c.z} KB (em ${c.s}) porque é o maior. Sobram ${c.z-z} KB.`;
+    if(s!=='worst' && same(z,m)) t+=' Aqui First-fit e Best-fit coincidem; a diferença aparece em E.';
+    return t;};
+  let r=choose(mem,6,s), b=clone(mem); mem=place(mem,r.idx,'D',6); q.shift(); push(why('D',6,b,r.idx,r.scan),{moved:'D',scan:r.scan,chosen:b[r.idx].s,before:b});
+  const rl=release(mem,'A'); mem=rl.mem; pr=prev('E',4);
+  push(`A terminou e liberou 5 KB no início. ${pr.txt}`,{preview:pr.pv});
+  r=choose(mem,4,s); b=clone(mem); mem=place(mem,r.idx,'E',4); q.shift(); push(why('E',4,b,r.idx,r.scan),{moved:'E',scan:r.scan,chosen:b[r.idx].s,before:b});
+  return S;
+}
+function scenM5(){
+  const S=[]; const T=16; Object.assign(sizeOf,{A:6,B:4,C:6,D:4});
+  let mem=[{s:0,z:6,p:'A',st:'rodando'},{s:6,z:4,p:'B',st:'esperando E/S'},{s:10,z:6,p:'C',st:'rodando'}], q=['D'], disk=[], reg=null;
+  const push=(msg,extra={})=>S.push({kind:'dyn',total:T,mem:clone(mem),queue:clone(q),disk:clone(disk),reg:reg&&{...reg},msg,swap:true,...extra});
+  push('Memória cheia: 16 de 16 KB ocupados. Chega D (4 KB) e não há espaço.',{wait:['D']});
+  push('O SO escolhe um processo que está parado: B, bloqueado esperando uma operação de E/S.',{wait:['D'],hlp:'B'});
+  mem=mem.map(b=>b.p==='B'?{s:b.s,z:b.z,p:null}:b); disk=['B']; push('Swap out: B é copiado para o disco e a área dele (6 a 10 KB) fica livre.',{moved:'B',wait:['D']});
+  mem=mem.map(b=>b.s===6?{s:6,z:4,p:'D',st:'rodando'}:b); q=[]; push('D entra no lugar de B.',{moved:'D'});
+  mem=release(mem,'A').mem; push('A terminou: o início da memória (0 a 6 KB) ficou livre.');
+  disk=[]; mem=place(mem,0,'B',4); mem=mem.map(b=>b.p==='B'?{...b,st:'pronto'}:b); reg={p:'B',old:6,neu:0};
+  push('Swap in: B volta do disco, mas para OUTRO endereço (0 KB), porque o lugar antigo agora é de D.',{moved:'B'});
+  push('Isso só funciona com relocação dinâmica: o registrador de relocação guarda o novo início de B, e o hardware soma esse valor a cada endereço que B acessa.');
+  return S;
+}
+function scenM6(){
+  const S=[]; const T=64; Object.assign(sizeOf,{SI:8,PM:16,AT:4,MB:40,TP:39});
+  let mem=[{s:0,z:T,p:null}], q=['SI','PM','AT','MB','TP'], disk=[];
+  const push=(msg,extra={})=>S.push({kind:'dyn',total:T,mem:clone(mem),queue:clone(q),disk:clone(disk),msg,real:true,swap:true,...extra});
+  push('Cenário didático: memória de 64 KB e programas da época, com tamanhos arredondados. Estratégia: first-fit.');
+  for(const p of ['SI','PM','AT']){ const r=choose(mem,sizeOf[p],'first'); const b=clone(mem); mem=place(mem,r.idx,p,sizeOf[p]); q.shift();
+    push(`${PROG[p].L} (${sizeOf[p]} KB) entra a partir de ${b[r.idx].s} KB.`,{moved:p,scan:r.scan,chosen:b[r.idx].s,before:b}); }
+  let r=choose(mem,40,'first'); push('Super Mario Bros. precisa de 40 KB e só há 36 KB livres. Espera.',{scan:r.scan,nofit:true,before:clone(mem),wait:['MB']});
+  mem=release(mem,'SI').mem; r=choose(mem,40,'first'); push('Space Invaders terminou: agora há 44 KB livres, mas em dois pedaços (8 e 36 KB). Mario continua sem caber: fragmentação externa.',{scan:r.scan,nofit:true,before:clone(mem),wait:['MB']});
+  mem=compact(mem,T); push('Compactação: Pac-Man e Pitfall! são movidos para o início. Os 44 KB livres viram um bloco só.',{wait:['MB']});
+  r=choose(mem,40,'first'); let b=clone(mem); mem=place(mem,r.idx,'MB',40); q.shift(); push('Super Mario Bros. (40 KB) entra. Sobram 4 KB.',{moved:'MB',scan:r.scan,chosen:b[r.idx].s,before:b});
+  push('Turbo Pascal (39 KB) chega e não cabe nos 4 KB livres.',{wait:['TP']});
+  mem=mem.map(x=>x.p==='MB'?{s:x.s,z:x.z,p:null}:x); mem=release(mem,'__').mem; disk=['MB'];
+  push('Swap out: Mario está parado esperando o jogador, então vai para o disco. Ficam 44 KB livres.',{moved:'MB',wait:['TP']});
+  r=choose(mem,39,'first'); b=clone(mem); mem=place(mem,r.idx,'TP',39); q=[]; push('Turbo Pascal entra. Para comparar: o Windows 1.0 (1985) pedia 256 KB, e o computador da Apollo 11 tinha cerca de 4 KB de RAM.',{moved:'TP',scan:r.scan,chosen:b[r.idx].s,before:b});
+  return S;
+}
+
+/* ---------------- estado ---------------- */
+let mode='m1', strat='first', cmp=false, step=0, steps=[], playing=null, busy=false;
+function build(){
+  if(mode==='m1') steps=scenM1();
+  else if(mode==='m2') steps=scenM2();
+  else if(mode==='m3') steps=scenM3();
+  else if(mode==='m4') steps= cmp? ['first','best','worst'].map(scenM4) : scenM4(strat);
+  else if(mode==='m5') steps=scenM5();
+  else steps=scenM6();
+}
+const nSteps=()=> (mode==='m4'&&cmp)? steps[0].length : steps.length;
+const cur=()=> (mode==='m4'&&cmp)? steps[0][step] : steps[step];
+const animOn=()=>document.getElementById('anim').checked;
+
+/* ---------------- render ---------------- */
+function progEl(p,tag,cls='card'){
+  const P=PROG[p]; const d=document.createElement('div'); d.className=cls+' proc'+(P.dark?' dark':''); d.dataset.pid=p;
+  d.style.background=`var(${P.c})`;
+  const real=P.real; d.innerHTML=`<span class="L">${P.L}</span><span class="S">${sizeOf[p]} KB</span>${tag?`<span class="tag">${tag}</span>`:''}`;
+  if(real && cls==='card') d.title=P.real;
+  return d;
+}
+function heights(sizes,H,minH){ const n=sizes.length, tot=sizes.reduce((a,b)=>a+b,0); const k=Math.max(0,(H-n*minH))/tot; return sizes.map(z=>minH+z*k); }
+
+function memDyn(st,opts={}){
+  const wrap=document.createElement('div'); wrap.className='memwrap';
+  const addr=document.createElement('div'); addr.className='addr';
+  const mem=document.createElement('div'); mem.className='mem';
+  wrap.append(addr,mem);
+  requestAnimationFrame(()=>{});
+  const draw=(memList)=>{
+    mem.innerHTML=''; addr.innerHTML='';
+    const H=mem.clientHeight||400, soH=Math.max(28,H*0.07);
+    const so=document.createElement('div'); so.className='blk so'; so.style.top='0px'; so.style.height=soH+'px'; so.textContent='Sistema Operacional'; mem.appendChild(so);
+    const hs=heights(memList.map(b=>b.z),H-soH,26); let y=soH;
+    memList.forEach((b,i)=>{
+      const d=document.createElement('div'); d.className='blk'+(b.p?' proc'+(PROG[b.p].dark?' dark':''):' free'); d.dataset.start=b.s;
+      d.style.top=y+'px'; d.style.height=hs[i]+'px';
+      if(b.p){ d.dataset.pid=b.p; d.style.background=`var(${PROG[b.p].c})`;
+        d.innerHTML=`<span class="L">${PROG[b.p].L}</span><span class="S">${b.z} KB</span>${b.st?`<span class="tag">${b.st}</span>`:''}`; }
+      else d.innerHTML=`<span class="t">livre</span><span class="S">${b.z} KB</span>`;
+      if(opts.hlp && b.p===opts.hlp) d.classList.add('chosen');
+      mem.appendChild(d);
+      const a=document.createElement('span'); a.style.top=y+'px'; a.textContent=b.s; addr.appendChild(a);
+      y+=hs[i];
+    });
+    const a=document.createElement('span'); a.style.top=(H-2)+'px'; a.textContent=st.total+' KB'; addr.appendChild(a);
+  };
+  wrap._draw=draw; return wrap;
+}
+function memPart(st){
+  const wrap=document.createElement('div'); wrap.className='memwrap parted';
+  const addr=document.createElement('div'); addr.className='addr';
+  const mem=document.createElement('div'); mem.className='mem';
+  wrap.append(addr,mem);
+  wrap._draw=()=>{
+    mem.innerHTML=''; const H=mem.clientHeight||400, soH=Math.max(28,H*0.1);
+    const so=document.createElement('div'); so.className='blk so'; so.style.top='0'; so.style.height=soH+'px'; so.textContent='Sistema Operacional'; mem.appendChild(so);
+    const hs=heights(st.parts.map(p=>p.z),H-soH,60); let y=soH; wrap._rows=[];
+    st.parts.forEach((p,i)=>{
+      const d=document.createElement('div'); d.className='part'; d.style.top=y+'px'; d.style.height=hs[i]+'px';
+      if(st.hl&&st.hl.includes(i)) d.classList.add('chosen');
+      if(p.p){ const z=sizeOf[p.p], oh=Math.max(30,hs[i]*z/p.z);
+        const o=document.createElement('div'); o.className='occ proc'+(PROG[p.p].dark?' dark':''); o.dataset.pid=p.p; o.style.background=`var(${PROG[p.p].c})`; o.style.height=Math.min(oh,hs[i]-(z<p.z?20:0))+'px';
+        o.innerHTML=`<span class="L">${PROG[p.p].L}</span><span class="S">${z} KB</span>`; d.appendChild(o);
+        if(z<p.z){ const w=document.createElement('div'); w.className='waste'; w.style.top=Math.min(oh,hs[i]-20)+'px'; w.textContent=`sobra ${p.z-z} KB`; d.appendChild(w); }
+      } else { const f=document.createElement('div'); f.className='pfree'; f.textContent='livre'; d.appendChild(f); }
+      const nm=document.createElement('div'); nm.className='pname'; nm.innerHTML=`Partição ${i+1}<small>${p.z} KB</small>`; d.appendChild(nm);
+      mem.appendChild(d); wrap._rows.push({top:y,h:hs[i]}); y+=hs[i];
+    });
+  };
+  return wrap;
+}
+function queueCol(st,memWrap){
+  const col=document.createElement('section'); col.className='col';
+  col.innerHTML=`<h2>${st.queues?'Filas (uma por partição)':'Fila de programas'}</h2>`;
+  const body=document.createElement('div'); body.className='colbody'; col.appendChild(body);
+  const waits=st.wait||[];
+  if(st.queues){
+    body._draw=()=>{ body.innerHTML=''; const rows=memWrap._rows||[];
+      st.queues.forEach((qq,i)=>{ const r=rows[i]; if(!r) return; const row=document.createElement('div'); row.className='qrow'; row.style.top=r.top+'px'; row.style.height=r.h+'px';
+        if(!qq.length){ row.innerHTML='<span class="empty">vazia</span>'; }
+        qq.slice().reverse().forEach(p=>{ const c=progEl(p); if(waits.includes(p)){c.classList.add('wait'); c.insertAdjacentHTML('beforeend','<span class="w">esperando</span>');} row.appendChild(c); });
+        row.insertAdjacentHTML('beforeend','<span class="arrow">→</span>'); body.appendChild(row); }); };
+  } else {
+    const qd=document.createElement('div'); qd.className='queue'; body.appendChild(qd);
+    if(!st.queue.length) qd.innerHTML='<span class="empty">fila vazia</span>';
+    st.queue.forEach(p=>{ const c=progEl(p); if(waits.includes(p)){c.classList.add('wait'); c.insertAdjacentHTML('beforeend','<span class="w">esperando</span>');} if(st.real){c.insertAdjacentHTML('beforeend','');} qd.appendChild(c); });
+    body._draw=()=>{};
+  }
+  return col;
+}
+function sideCol(st){
+  const col=document.createElement('section'); col.className='col side';
+  if(st.table){ const t=document.createElement('div'); t.className='box';
+    t.innerHTML='<h3>Tabela de partições</h3><table><thead><tr><th>Partição</th><th>Tamanho</th><th>Livre?</th></tr></thead><tbody>'+
+      st.parts.map((p,i)=>`<tr><td>${i+1}</td><td class="n">${p.z} KB</td><td><b>${p.p?'Não':'Sim'}</b></td></tr>`).join('')+'</tbody></table>'; col.appendChild(t); }
+  if(st.swap){ const d=document.createElement('div'); d.className='box disk';
+    d.innerHTML='<h3>Disco (área de swap)</h3><svg viewBox="0 0 64 56" aria-hidden="true"><ellipse cx="32" cy="10" rx="28" ry="8" fill="#ddd" stroke="#111" stroke-width="2"/><path d="M4 10v34c0 4.4 12.5 8 28 8s28-3.6 28-8V10" fill="#ddd" stroke="#111" stroke-width="2"/><path d="M4 27c0 4.4 12.5 8 28 8s28-3.6 28-8" fill="none" stroke="#111" stroke-width="2"/></svg>';
+    const dc=document.createElement('div'); dc.className='diskcards'; (st.disk||[]).forEach(p=>dc.appendChild(progEl(p,'no disco'))); if(!(st.disk||[]).length) dc.innerHTML='<span class="empty">vazio</span>';
+    d.appendChild(dc); col.appendChild(d); }
+  if(mode==='m5'){ const r=document.createElement('div'); r.className='box';
+    r.innerHTML='<h3>Registrador de relocação</h3>'+(st.reg?`<div class="reg">${st.reg.p}: base <s>${st.reg.old} KB</s> → <b>${st.reg.neu} KB</b></div><p class="note">endereço físico = base + endereço lógico</p>`:'<p class="note">Aparece quando um processo volta do disco para outro lugar.</p>'); col.appendChild(r); }
+  if(mode==='m4'){ const r=document.createElement('div'); r.className='box';
+    r.innerHTML='<h3>Regra da estratégia</h3><table><tbody><tr><td><b>First-fit</b></td><td>a primeira área onde cabe</td></tr><tr><td><b>Best-fit</b></td><td>a menor área onde cabe</td></tr><tr><td><b>Worst-fit</b></td><td>a maior área</td></tr></tbody></table>'; col.appendChild(r); }
+  if(st.real){ col.insertAdjacentHTML('beforeend','<div class="disclaimer">Tamanhos aproximados · cenário didático: esses programas nunca dividiram memória num mesmo sistema.</div>'); }
+  const lg=document.createElement('div'); lg.className='box legend';
+  lg.innerHTML='<h3>Legenda</h3><div><i style="background:var(--so)"></i>Sistema Operacional</div><div><i style="background:#fff;border:2px dashed #7d7d7d"></i>Área livre</div>'+
+    (st.kind==='part'?'<div><i style="background:repeating-linear-gradient(135deg,#fff 0 4px,#f3c9c9 4px 6px);border-color:#c00000"></i>Desperdício (fragmentação interna)</div>':'')+
+    '<div><i style="background:#111"></i>Contorno preto: área examinada ou escolhida</div>';
+  col.appendChild(lg);
+  return col;
+}
+
+function counters(st){
+  const el=document.getElementById('counters'); let free,areas,maior,waste,wl;
+  if(st.kind==='part'){ const fp=st.parts.filter(p=>!p.p); free=fp.reduce((a,p)=>a+p.z,0); areas=fp.length; maior=fp.reduce((a,p)=>Math.max(a,p.z),0);
+    waste=st.parts.filter(p=>p.p).reduce((a,p)=>a+(p.z-sizeOf[p.p]),0); free+=waste; wl='Desperdiçado (frag. interna)'; }
+  else { const fp=dynFree(st.mem); free=fp.reduce((a,b)=>a+b.z,0); areas=fp.length; maior=fp.reduce((a,b)=>Math.max(a,b.z),0); waste=free-maior; wl='Livre fora do maior bloco (frag. externa)'; }
+  el.innerHTML=`<div>Memória livre total <b>${free} KB</b></div><div>Áreas livres <b>${areas}</b></div><div>Maior bloco livre <b>${maior} KB</b></div><div class="${waste?'bad':''}">${wl} <b>${waste} KB</b></div>`;
+}
+
+/* FLIP: guarda a posição de cada programa antes de redesenhar */
+function snapshot(){ const m={}; document.querySelectorAll('[data-pid]').forEach(e=>{ if(!m[e.dataset.pid]) m[e.dataset.pid]=e.getBoundingClientRect(); }); return m; }
+function flip(prev){
+  if(!animOn()||!prev) return;
+  document.querySelectorAll('#stage [data-pid]').forEach(e=>{ const a=prev[e.dataset.pid]; if(!a) return; const b=e.getBoundingClientRect();
+    const S=window.__scale||1, dx=(a.left-b.left)/S, dy=(a.top-b.top)/S; if(Math.abs(dx)<2&&Math.abs(dy)<2) return;
+    const sx=a.width/b.width, sy=a.height/b.height;
+    e.animate([{transform:`translate(${dx}px,${dy}px) scale(${sx},${sy})`,transformOrigin:'top left',zIndex:5},{transform:'none',transformOrigin:'top left'}],{duration:480,easing:'cubic-bezier(.3,.7,.2,1)'}); });
+}
+
+function drawStage(st,prev,memOverride){
+  const stage=document.getElementById('stage'); stage.className='stage'; stage.innerHTML='';
+  const memCol=document.createElement('section'); memCol.className='col';
+  memCol.innerHTML=`<h2>Memória principal${st.total?` · ${st.total} KB`:''}</h2>`;
+  const mb=document.createElement('div'); mb.className='colbody'; memCol.appendChild(mb);
+  const mw= st.kind==='part'? memPart(st) : memDyn(st,{hlp:st.hlp}); mb.appendChild(mw);
+  const qc=queueCol(st,mw);
+  stage.append(qc,memCol,sideCol(st));
+  mw._draw(memOverride||st.mem); qc.querySelector('.colbody')._draw();
+  flip(prev);
+  return mw;
+}
+function drawCompare(){
+  const stage=document.getElementById('stage'); stage.className='stage cmp'; stage.innerHTML='';
+  const N={first:'First-fit',best:'Best-fit',worst:'Worst-fit'}; const ws=[];
+  ['first','best','worst'].forEach((s,i)=>{ const st=steps[i][step];
+    const col=document.createElement('section'); col.className='col'; col.innerHTML=`<h2>${N[s]}</h2>`;
+    const mb=document.createElement('div'); mb.className='colbody'; col.appendChild(mb); const mw=memDyn(st); mb.appendChild(mw);
+    const fp=dynFree(st.mem), mx=fp.reduce((a,b)=>Math.max(a,b.z),0); const d=document.createElement('div'); d.className='cstat';
+    d.innerHTML=`${fp.length} áreas livres · maior bloco <b>${mx} KB</b>`; col.appendChild(d); stage.appendChild(col); ws.push([mw,st]); });
+  ws.forEach(([mw,st])=>{ mw._draw(st.mem); if(st.chosen!=null&&st.moved){ const e=mw.querySelector(`[data-start="${st.chosen}"]`); e&&e.classList.add('chosen'); }
+ });
+  document.getElementById('counters').innerHTML='<div>Cada coluna mostra a mesma sequência com uma estratégia diferente.</div>';
+}
+
+function render(dir=0){
+  const st=cur(); document.getElementById('stepn').textContent=`${step+1}/${nSteps()}`;
+  let msg=st.msg; if(mode==='m4'&&cmp){ msg = step===0? steps[0][0].msg : ['first','best','worst'].map((s,i)=>steps[i][step].msg.split(' Sobram')[0].replace(/ porque.*$/,'')).join('  ·  '); }
+  document.getElementById('msg').textContent=msg;
+  counters(st);
+  document.getElementById('bBack').disabled=step===0; document.getElementById('bNext').disabled=step>=nSteps()-1;
+  document.querySelectorAll('#modes button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+  document.getElementById('strat').hidden= mode!=='m4';
+  document.querySelectorAll('#strat button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.s==='cmp'? cmp : (!cmp && b.dataset.s===strat)));
+  if(mode==='m4'&&cmp){ drawCompare(); return; }
+  const prev=snapshot();
+  if(dir>0 && st.scan && st.before && animOn()){
+    // fase 1: mostra a memória antes, examinando as áreas livres uma a uma
+    busy=true; const prevSt=steps[step-1]||st;
+    const mw=drawStage({...st,queue:prevSt.queue||st.queue,disk:prevSt.disk||st.disk,moved:null},prev,st.before);
+    const els=st.scan.map(a=>mw.querySelector(`[data-start="${a}"]`)); let i=0;
+    const tick=()=>{ els.forEach(e=>e&&e.classList.remove('scan'));
+      if(i<els.length){ const e=els[i]; if(e){ e.classList.add('scan'); if(st.before.find(b=>b.s===st.scan[i]).z < (sizeOf[st.moved]||Infinity) || st.nofit) e.classList.add('nofit'); } i++; setTimeout(tick,420); }
+      else { if(st.chosen!=null){ const c=mw.querySelector(`[data-start="${st.chosen}"]`); c&&(c.classList.remove('nofit'),c.classList.add('chosen')); }
+        setTimeout(()=>{ const p2=snapshot(); drawStage(st,p2); markChosen(st); busy=false; }, st.nofit?600:450); } };
+    tick(); return;
+  }
+  drawStage(st,prev); markChosen(st);
+}
+function markChosen(st){ if(st.moved && st.chosen!=null){ const e=document.querySelector(`#stage .mem [data-pid="${st.moved}"]`); if(e) e.classList.add('chosen'); }
+  if(st.preview){ const e=document.querySelector(`#stage .mem [data-start="${st.preview.start}"]`); if(e){ e.classList.add('target'); e.dataset.tlabel=`${st.preview.p} vai para cá`; } } }
+
+/* ---------------- controles ---------------- */
+function go(d){ if(busy) return; const n=step+d; if(n<0||n>=nSteps()) return; step=n; render(d); }
+function setMode(m){ stop(); mode=m; cmp=false; step=0; build(); render(); }
+function stop(){ if(playing){clearInterval(playing);playing=null;} const b=document.getElementById('bPlay'); b.innerHTML='<span>▶ Reproduzir<span class="kb">espaço</span></span><span class="d">avança sozinho</span>'; b.setAttribute('aria-pressed','false'); }
+function play(){ if(playing){stop();return;} if(step>=nSteps()-1){step=0;render();}
+  const bp=document.getElementById('bPlay'); bp.innerHTML='<span>❚❚ Pausar<span class="kb">espaço</span></span><span class="d">está reproduzindo</span>'; bp.setAttribute('aria-pressed','true');
+  playing=setInterval(()=>{ if(busy) return; if(step>=nSteps()-1){stop();return;} go(1); }, +document.getElementById('speed').value); }
+document.getElementById('modes').addEventListener('click',e=>{const b=e.target.closest('button'); if(b) setMode(b.dataset.m);});
+document.getElementById('strat').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; stop();
+  if(b.dataset.s==='cmp'){ cmp=!cmp; } else { cmp=false; strat=b.dataset.s; } build(); render(); });
+document.getElementById('bBack').onclick=()=>go(-1);
+document.getElementById('bNext').onclick=()=>go(1);
+document.getElementById('bPlay').onclick=play;
+document.getElementById('speed').onchange=()=>{ if(playing){stop();play();} };
+document.getElementById('bReset').onclick=()=>{stop();step=0;render();};
+function full(){ try{ if(!document.fullscreenElement){ const p=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); p&&p.catch&&p.catch(()=>{}); } else document.exitFullscreen(); }catch(_){} }
+document.getElementById('bFull').onclick=full;
+function syncAnim(){ const on=document.getElementById('anim').checked, b=document.getElementById('bAnim'); b.setAttribute('aria-pressed',on); b.innerHTML=`<span>Animação: ${on?'ligada':'desligada'}<span class="kb">A</span></span><span class="d">blocos deslizando</span>`; }
+function toggleAnim(){ const c=document.getElementById('anim'); c.checked=!c.checked; syncAnim(); }
+document.getElementById('bAnim').onclick=toggleAnim;
+document.addEventListener('fullscreenchange',()=>{ const b=document.getElementById('bFull'); const on=!!document.fullscreenElement; b.setAttribute('aria-pressed',on); b.innerHTML=`<span>⛶ ${on?'Sair da tela cheia':'Tela cheia'}<span class="kb">F</span></span><span class="d">ocupa a TV inteira</span>`; });
+document.addEventListener('keydown',e=>{
+  if(e.target.closest('select,input')) return; const k=e.key.toLowerCase();
+  if(k==='arrowright'){e.preventDefault();stop();go(1);} else if(k==='arrowleft'){e.preventDefault();stop();go(-1);}
+  else if(k===' '){e.preventDefault();play();} else if(k==='r'){stop();step=0;render();} else if(k==='a'){toggleAnim();} else if(k==='f'){full();}
+  else if('12345'.includes(k)&&k.length===1){setMode('m'+k);} else if(k==='n'){setMode('m6');}
+  else if(mode==='m4'&&k==='s'){ const o=['first','best','worst']; cmp=false; strat=o[(o.indexOf(strat)+1)%3]; build(); render(); }
+  else if(mode==='m4'&&k==='c'){ cmp=!cmp; build(); render(); }
+});
+try{ if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.getElementById('anim').checked=false; }catch(_){}
+syncAnim();
+function fit(){ const app=document.querySelector('.app');
+  if(innerWidth<820){ window.__scale=1; app.style.transform='none'; return; }
+  const s=Math.min(innerWidth/1600, innerHeight/900); window.__scale=s;
+  app.style.transform=`translate(${(innerWidth-1600*s)/2}px,${(innerHeight-900*s)/2}px) scale(${s})`; }
+fit();
+let rz; window.addEventListener('resize',()=>{ fit(); clearTimeout(rz); rz=setTimeout(()=>{ if(!busy) render(); },150);});
+document.addEventListener('fullscreenchange',()=>setTimeout(fit,50));
+build(); render();
+</script>
+</body></html>
