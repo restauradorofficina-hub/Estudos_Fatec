@@ -1,5 +1,4 @@
-<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Simulador de Partições</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -7,7 +6,7 @@
 :root{
   color-scheme:light;
   --bg:#f2f2f0; --paper:#ffffff; --ink:#111111; --ink2:#4a4a4a; --rule:#c9c9c4; --so:#8c8c8c;
-  --A:#2E75B6; --B:#548235; --C:#C55A11; --D:#7030A0; --E:#BF8F00;
+  --A:#2E75B6; --B:#548235; --C:#C55A11; --D:#7030A0; --E:#BF8F00; --F:#1F6F78;
   --waste:#c00000; --mark:#3B1E5E; --roxo:#3B1E5E; --hl:#FFC000;
   --sans:"Segoe UI",Arial,Helvetica,sans-serif;
   --mono:Consolas,"Courier New",monospace;
@@ -118,6 +117,50 @@ td.n{font-family:var(--mono)}
 .ctrls button:disabled{opacity:.3;cursor:default}
 .ctrls .kb{font-family:var(--mono);font-size:.62em;border:1px solid currentColor;padding:0 .3em;margin-left:.45em;vertical-align:.15em;opacity:.75}
 .ctrls button[aria-pressed="true"],.ctrls button[aria-pressed="true"]:hover{background:var(--hl);color:var(--roxo);border-color:var(--roxo)}
+/* modo Unix */
+.hand{position:absolute;left:4px;top:3px;font-size:.6em;font-weight:800;background:var(--hl);color:var(--roxo);padding:0 .35em;border:1px solid var(--roxo);z-index:2}
+.hand.h2{top:auto;bottom:3px;background:var(--roxo);color:var(--hl)}
+.blk.linger{background:repeating-linear-gradient(135deg,#fff 0 8px,#ece6f3 8px 12px);color:var(--roxo);outline:2px dashed var(--roxo);outline-offset:-6px;font-weight:700}
+.blk.linger{flex-direction:column;gap:0}.blk.linger .S{font-weight:600;font-size:.8em}
+.users{display:flex;flex-direction:column;gap:14px;padding-top:.6em}
+.ucard{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center;border:2px solid #111;background:var(--paper);padding:.35em .6em;position:relative}
+.ucard .sw{grid-row:span 2;width:1.1em;height:2.2em;border:1px solid #111}
+.ucard .un{font-weight:700;font-size:1.05em}
+.ucard .up{font-family:var(--mono);font-size:.8em;color:var(--ink2)}
+.ucard .us{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.62em;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.1em .4em;border:1px solid #111;background:#fff}
+.ucard.st-fora{opacity:.35}
+.ucard.st-esperando{outline:3px solid var(--waste);outline-offset:2px}.ucard.st-esperando .us{background:var(--waste);color:#fff;border-color:var(--waste)}
+.ucard.st-disco .us{background:#111;color:#fff}
+.ucard.st-ativo .us{background:var(--roxo);color:var(--hl);border-color:var(--roxo)}
+.cm td{padding:2px 6px;font-size:.92em}
+.cm tr.lg td{color:var(--roxo);font-style:italic}
+/* modo Windows x Unix */
+.stage.wu{grid-template-columns:1fr 1fr;gap:34px}
+.wuhalf{display:flex;flex-direction:column;min-height:0;min-width:0}
+.wuhalf>h2{font-size:.85em;margin:0 0 8px;color:var(--roxo);font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-bottom:3px solid var(--roxo);padding-bottom:4px}
+.wuhalf>h2 small{font-weight:600;color:var(--ink2);letter-spacing:.02em;text-transform:none;font-size:.9em}
+.wubody{flex:1;min-height:0;display:grid;grid-template-columns:370px 1fr;gap:14px}
+.wumem{position:relative;display:grid;grid-template-columns:2.4em 1fr;min-height:0}
+.wumem .addr span{right:5px}
+.wumem .blk{font-size:.9em;white-space:nowrap}
+.wuside{display:flex;flex-direction:column;gap:10px;font-size:.82em;min-height:0}
+.wuside table td,.wuside table th{padding:2px 5px}
+.wunote{border:2px solid var(--roxo);border-left:8px solid var(--roxo);background:var(--paper);padding:8px 10px;font-size:1.3em;line-height:1.32;flex:1}
+.wunote ul{margin:0;padding-left:1.1em}.wunote li{margin:0 0 3px}
+.wuside .diskcards .card{font-size:.85em;min-width:0;padding:.15em .4em}
+.lpm{background:repeating-linear-gradient(135deg,#fff 0 8px,#fde3c8 8px 12px)!important;outline-color:var(--C)!important;color:#7a3300!important}
+/* v3.4 */
+.col h2.qh{text-align:right;padding-right:4px}
+.col h2.mh{padding-left:4em}
+.col h2 .vm{display:inline-block;margin-left:.6em;background:var(--hl);color:var(--roxo);padding:0 .5em;letter-spacing:.04em;font-weight:800}
+.qrow .tie{flex:none;position:relative;width:calc(28px + 3.2em + 14px);margin-right:calc(-28px - 3.2em - 4px);border-top:3px dashed var(--roxo);height:0;align-self:center}
+.qrow .tie::after{content:'';position:absolute;right:-2px;top:-8px;border:6px solid transparent;border-left:9px solid var(--roxo)}
+.qrow .tie i{position:absolute;left:0;top:4px;font-style:normal;font-size:.6em;font-weight:700;color:var(--roxo);white-space:nowrap}
+.box.kw{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
+.box.kw h3{flex-basis:100%}
+.kwc{border:1.5px solid var(--roxo);color:var(--roxo);background:#fff;padding:.05em .45em;font-size:.85em;font-weight:600}
+.kwc.on{background:var(--hl);border-color:var(--roxo);font-weight:800}
+.ucard .un small{font-family:var(--mono);font-size:.7em;font-weight:600;color:var(--ink2);margin-left:.3em}
 #anim{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
 .ctrls select{font:inherit;font-size:.85em;border:2px solid var(--ink);background:#fff;padding:.25em}
 .ctrls label{font-size:.85em;display:flex;gap:4px;align-items:center}
@@ -141,7 +184,8 @@ td.n{font-family:var(--mono)}
       <button id="m3" data-m="m3" title="Alocação dinâmica (tecla 3)">Dinâmica</button>
       <button id="m4" data-m="m4" title="First, Best e Worst-fit (tecla 4)">Estratégias</button>
       <button id="m5" data-m="m5" title="Swapping (tecla 5)">Swapping</button>
-      <button id="m6" data-m="m6" title="Programas da época (tecla N)">Programas da época</button>
+      <button id="m8" data-m="m8" title="Estudo de caso: Unix, multiprogramação (tecla U)">Unix</button>
+      <button id="m7" data-m="m7" title="Estudo de caso: Windows 2000, memória virtual por paginação (tecla W)">Windows</button>
     </nav>
     <div class="sub" id="strat" hidden>
       <button id="s-first" data-s="first" title="A primeira área que cabe">First-fit</button>
@@ -172,7 +216,7 @@ td.n{font-family:var(--mono)}
 <script>
 /* ---------------- programas ---------------- */
 const PROG = {
-  A:{L:'A',c:'--A'}, B:{L:'B',c:'--B'}, C:{L:'C',c:'--C'}, D:{L:'D',c:'--D'}, E:{L:'E',c:'--E',dark:true},
+  A:{L:'A',c:'--A'}, B:{L:'B',c:'--B'}, C:{L:'C',c:'--C'}, D:{L:'D',c:'--D'}, E:{L:'E',c:'--E',dark:true}, F:{L:'F',c:'--F'},
   SI:{L:'Space Invaders',c:'--A',real:'fliperama, 1978'}, PM:{L:'Pac-Man',c:'--E',dark:true,real:'fliperama, 1980'},
   AT:{L:'Pitfall!',c:'--C',real:'Atari 2600, 1982'}, MB:{L:'Super Mario Bros.',c:'--D',real:'NES, 1985'},
   TP:{L:'Turbo Pascal 1.0',c:'--B',real:'1983'}
@@ -285,22 +329,124 @@ function scenM5(){
   push('Isso só funciona com relocação dinâmica: o registrador de relocação guarda o novo início de B, e o hardware soma esse valor a cada endereço que B acessa.');
   return S;
 }
-function scenM6(){
-  const S=[]; const T=64; Object.assign(sizeOf,{SI:8,PM:16,AT:4,MB:40,TP:39});
-  let mem=[{s:0,z:T,p:null}], q=['SI','PM','AT','MB','TP'], disk=[];
-  const push=(msg,extra={})=>S.push({kind:'dyn',total:T,mem:clone(mem),queue:clone(q),disk:clone(disk),msg,real:true,swap:true,...extra});
-  push('Cenário didático: memória de 64 KB e programas da época, com tamanhos arredondados. Estratégia: first-fit.');
-  for(const p of ['SI','PM','AT']){ const r=choose(mem,sizeOf[p],'first'); const b=clone(mem); mem=place(mem,r.idx,p,sizeOf[p]); q.shift();
-    push(`${PROG[p].L} (${sizeOf[p]} KB) entra a partir de ${b[r.idx].s} KB.`,{moved:p,scan:r.scan,chosen:b[r.idx].s,before:b}); }
-  let r=choose(mem,40,'first'); push('Super Mario Bros. precisa de 40 KB e só há 36 KB livres. Espera.',{scan:r.scan,nofit:true,before:clone(mem),wait:['MB']});
-  mem=release(mem,'SI').mem; r=choose(mem,40,'first'); push('Space Invaders foi FECHADO: agora há 44 KB livres, mas em dois pedaços (8 e 36 KB). Mario continua sem caber: fragmentação externa.',{scan:r.scan,nofit:true,before:clone(mem),wait:['MB'],closed:['SI']});
-  mem=compact(mem,T); push('Compactação: Pac-Man e Pitfall! são movidos para o início. Os 44 KB livres viram um bloco só.',{wait:['MB']});
-  r=choose(mem,40,'first'); let b=clone(mem); mem=place(mem,r.idx,'MB',40); q.shift(); push('Super Mario Bros. (40 KB) entra. Sobram 4 KB.',{moved:'MB',scan:r.scan,chosen:b[r.idx].s,before:b});
-  push('Turbo Pascal (39 KB) chega e não cabe nos 4 KB livres.',{wait:['TP']});
-  mem=mem.map(x=>x.p==='MB'?{s:x.s,z:x.z,p:null}:x); mem=release(mem,'__').mem; disk=['MB'];
-  push('Swap out: Mario está parado esperando o jogador, então vai para o disco. Ficam 44 KB livres.',{moved:'MB',wait:['TP']});
-  r=choose(mem,39,'first'); b=clone(mem); mem=place(mem,r.idx,'TP',39); q=[]; push('Turbo Pascal entra. Para comparar: o Windows 1.0 (1985) pedia 256 KB, e o computador da Apollo 11 tinha cerca de 4 KB de RAM.',{moved:'TP',scan:r.scan,chosen:b[r.idx].s,before:b});
+function scenM7(){
+  const S=[]; Object.assign(sizeOf,{B:4,C:8,E:8,D:12,F:8});
+  S.push({kind:'dyn',total:32,mem:[{s:0,z:4,p:'B'},{s:4,z:4,p:null},{s:8,z:8,p:'C'},{s:16,z:4,p:null},{s:20,z:8,p:'E'},{s:28,z:4,p:null}],queue:['D'],wait:['D'],
+    msg:'O problema do cap. 9: há 12 KB livres, mas em três pedaços de 4 KB. D precisa de 12 KB contíguos e não entra (fragmentação externa). Como o Windows 2000 resolve isso?'});
+  let fr=['B0',null,'C0','C1',null,'E0','E1',null], disk=[], q=['D'];
+  const push=(msg,extra={})=>S.push({kind:'page',total:32,frames:fr.slice(),queue:q.slice(),disk:disk.slice(),swap:true,msg,...extra});
+  push('Windows 2000 usa MEMÓRIA VIRTUAL por paginação: a memória é dividida em frames de 4 KB (tamanho da página no Pentium) e cada programa em páginas do mesmo tamanho (Machado; Maia, 2007, p. 277).',{wait:['D']});
+  q=['D0','D1','D2']; push('D (12 KB) é dividido em 3 páginas de 4 KB.');
+  fr[1]='D0'; fr[4]='D1'; fr[7]='D2'; q=[]; push('As páginas de D vão para os frames 1, 4 e 7, mesmo separados. A tabela de páginas guarda onde cada uma está: D entrou sem espaço contíguo e a fragmentação externa desapareceu.',{hlf:[1,4,7],hlp:['D']});
+  q=['F0','F1']; sizeOf.F=8; push('Chega F (8 KB = 2 páginas) e não há nenhum frame livre.',{wait:['F0','F1']});
+  fr[5]=null; fr[6]=null; disk=['E0','E1']; push('E está parado: as páginas dele saem do working set e vão para o arquivo de paginação (p. 280). Isto NÃO é swapping: E continua na memória virtual e cada página volta sozinha, quando for usada.',{wait:['F0','F1'],hlp:['E']});
+  fr[5]='F0'; fr[6]='F1'; q=[]; push('F ocupa os frames que E liberou.',{hlf:[5,6],hlp:['F']});
+  fr[0]=null; push('B foi FECHADO: o frame 0 ficou livre.',{closed:['B0']});
+  fr[0]='E0'; disk=['E1']; push('E volta a executar e precisa da página 0: ela é lida do arquivo de paginação para o frame 0, um lugar diferente do original. Só a página usada volta, não o processo inteiro.',{hlf:[0],hlp:['E']});
+  push('Resumo: o Windows usa MEMÓRIA VIRTUAL por paginação. Qualquer frame livre serve (fim da fragmentação externa) e só páginas vão e voltam do disco, nunca o processo inteiro como no swapping. Detalhes no cap. 10.');
   return S;
+}
+
+/* ---------------- modo Unix (Machado; Maia, 2007, seção 15.6) ---------------- */
+const UL = {
+  V0:{t:'grep',s:'texto · pág 0',c:'--roxo',o:'101 + 102',sh:1}, V1:{t:'grep',s:'texto · pág 1',c:'--roxo',o:'101 + 102',sh:1},
+  AD:{t:'grep 101',s:'dados',c:'--A',o:'101'}, AP:{t:'grep 101',s:'pilha',c:'--A',o:'101'},
+  BD:{t:'grep 102',s:'dados',c:'--B',o:'102'}, BP:{t:'grep 102',s:'pilha',c:'--B',o:'102'},
+  KT:{t:'sort',s:'texto',c:'--C',o:'103'}, CD:{t:'sort 103',s:'dados 0',c:'--C',o:'103'}, CD1:{t:'sort 103',s:'dados 1',c:'--C',o:'103'}, CP:{t:'sort 103',s:'pilha',c:'--C',o:'103'},
+  TT:{t:'cat',s:'texto',c:'--F',o:'104'}, TD:{t:'cat 104',s:'dados',c:'--F',o:'104'}
+};
+const USTATE={fora:'não iniciado',ativo:'executando',parado:'bloqueado (E/S)',esperando:'esperando memória',disco:'no disco (swap)',fim:'terminou'};
+function scenM8(){
+  const S=[]; let fr=[null,null,null,null,null,null,null,null], disk=[];
+  const U=(a,b,c,d)=>[
+    {n:'grep',pid:101,cmd:'grep erro log1.txt',c:'--A',s:a},
+    {n:'grep',pid:102,cmd:'grep aviso log2.txt',c:'--B',s:b},
+    {n:'sort',pid:103,cmd:'sort nomes.txt',c:'--C',s:c},
+    {n:'cat',pid:104,cmd:'cat relatorio.txt',c:'--F',s:d}];
+  const F=id=>({id}), L=id=>({id,lg:1});
+  const push=(msg,users,extra={})=>S.push({kind:'unix',total:32,frames:clone(fr),disk:disk.slice(),users,swap:true,msg,...extra});
+  push('Unix é multiprogramado: vários programas ficam na memória ao mesmo tempo e revezam a CPU. Aqui: grep, sort e cat. A gerência de memória é paginação com swapping (Machado; Maia, 2007, p. 294).',U('fora','fora','fora','fora'));
+  fr[0]=F('V0'); fr[1]=F('AD'); fr[2]=F('AP');
+  push('O grep (PID 101) começa. Paginação por demanda: só entram as páginas referenciadas (texto pág 0, dados e pilha). A pág 1 do código fica no arquivo executável até ser usada (p. 297).',U('ativo','fora','fora','fora'),{hlf:[0,1,2]});
+  fr[4]=F('BD'); fr[5]=F('BP');
+  push('Um segundo grep (PID 102) começa, em outro arquivo. O segmento de texto (o código) é protegido contra gravação e é compartilhado: os dois grep usam a mesma cópia. Só dados e pilha ocupam frames novos (p. 296).',U('ativo','ativo','fora','fora'),{hlf:[0,4,5],sh:1});
+  fr[3]=F('V1');
+  push('O grep 101 usa uma rotina que está na pág 1 do código: page fault. A página vem do executável para o frame 3 e serve aos dois. O grep 102 fica bloqueado, esperando leitura do disco (E/S).',U('ativo','parado','fora','fora'),{hlf:[3],sh:1});
+  push('O sort (PID 103) começa e precisa de 3 páginas, mas a lista de páginas livres tem só 2 frames, abaixo do mínimo. O daemon page (processo 2) é acordado para repor a lista (p. 297).',U('ativo','parado','esperando','fora'),{sh:1,lack:true});
+  push('Two-handed clock: o ponteiro 1 vai à frente desligando o bit de referência (R); o ponteiro 2 vem atrás conferindo. Quem continua com R = 0 não foi usado no intervalo: frames 3 e 4 são escolhidos (p. 297).',U('ativo','parado','esperando','fora'),{sh:1,rb:[1,1,1,0,0,0,null,null],hands:{p1:5,p2:4},sel:[3,4]});
+  fr[3]=L('V1'); fr[4]=null; disk=['BD'];
+  push('Pág 1 do grep (texto) vai direto para a lista livre: pode ser relida do executável. Os dados do grep 102 foram modificados: são gravados na área de swap antes. Política global: saíram páginas dos dois grep, não do sort.',U('ativo','parado','esperando','fora'),{sh:1});
+  fr[3]=F('V1');
+  push('Segunda chance: o grep 101 volta a usar a pág 1 do código. Ela ainda estava no frame 3, na lista livre, e é recuperada sem acessar o disco (p. 297).',U('ativo','parado','esperando','fora'),{sh:1,hlf:[3]});
+  fr[4]=F('KT'); fr[6]=F('CD'); fr[7]=F('CP');
+  push('O sort entra: texto, dados e pilha vão para os frames 4, 6 e 7, que não são vizinhos. Qualquer frame serve: não existe fragmentação externa.',U('ativo','parado','ativo','fora'),{sh:1,hlf:[4,6,7]});
+  push('Para ordenar, o sort precisa de mais memória (a área de dados é dinâmica) e a lista livre está vazia. A paginação não dá conta: entra o daemon swapper, que escolhe o processo inativo há mais tempo: o grep 102 (p. 298).',U('ativo','parado','esperando','fora'),{sh:1,sel:[5],lack:true});
+  fr[5]=null; disk=['BD','BP'];
+  push('O grep 102 vai inteiro para a área de swap: é o swapping do cap. 9, agora como último recurso. O código do grep continua na memória, porque o grep 101 ainda o usa.',U('ativo','disco','esperando','fora'),{sh:1,hlf:[0,3]});
+  fr[5]=F('CD1');
+  push('O frame liberado recebe a nova página de dados do sort.',U('ativo','disco','ativo','fora'),{sh:1,hlf:[5]});
+  fr[4]=null; fr[5]=null; fr[6]=null; fr[7]=null;
+  push('O sort terminou de ordenar: o processo é FECHADO e os quatro frames voltam para a lista livre.',U('ativo','disco','fim','fora'),{sh:1,closed:['KT','CD','CD1','CP']});
+  fr[6]=F('BD'); fr[7]=F('BP'); disk=[];
+  push('O swapper traz de volta quem está há mais tempo no disco: o grep 102, para outros frames. O código não precisa voltar: já está na memória, compartilhado com o grep 101.',U('ativo','ativo','fim','fora'),{sh:1,hlf:[6,7]});
+  fr[4]=F('TT'); fr[5]=F('TD');
+  push('O cat (PID 104) começa nos frames que sobraram. Agora três processos dividem a memória: multiprogramação.',U('ativo','ativo','fim','ativo'),{sh:1,hlf:[4,5]});
+  push('Resumo: no Unix vários programas dividem a memória em páginas. Mesmo programa, uma cópia só do código; a substituição de páginas é global (two-handed clock); e o swapping do cap. 9 fica como último recurso.',U('ativo','ativo','fim','ativo'),{sh:1});
+  return S;
+}
+function memUnix(st){
+  const wrap=document.createElement('div'); wrap.className='memwrap parted';
+  const addr=document.createElement('div'); addr.className='addr';
+  const mem=document.createElement('div'); mem.className='mem';
+  wrap.append(addr,mem);
+  wrap._draw=()=>{
+    mem.innerHTML=''; addr.innerHTML=''; const H=mem.clientHeight||400, soH=Math.max(34,H*0.08);
+    const so=document.createElement('div'); so.className='blk so'; so.style.top='0'; so.style.height=soH+'px'; so.innerHTML='Kernel + core map <span style="font-weight:400;font-size:.8em">(não paginável)</span>'; mem.appendChild(so);
+    const n=st.frames.length, fh=(H-soH)/n;
+    st.frames.forEach((f,i)=>{ const y=soH+i*fh;
+      const d=document.createElement('div'); d.style.top=y+'px'; d.style.height=fh+'px'; d.dataset.start=i;
+      if(f && !f.lg){ const P=UL[f.id]; d.className='blk proc'; d.dataset.pid=f.id; d.style.background=`var(${P.c})`;
+        d.innerHTML=`<span class="L">${P.t}</span><span class="S">${P.s}</span>${P.sh&&st.sh?'<span class="tag">compartilhado</span>':''}`; }
+      else if(f && f.lg){ const P=UL[f.id]; d.className='blk linger'; d.dataset.pid=f.id;
+        d.innerHTML=`<span class="t">lista livre</span><span class="S">ainda guarda: ${P.t} ${P.s}</span>`; }
+      else { d.className='blk free'; d.innerHTML='<span class="t">frame livre</span>'; }
+      if(st.hlf&&st.hlf.includes(i)) d.classList.add('chosen');
+      if(st.sel&&st.sel.includes(i)) d.classList.add('chosen');
+      if(st.hands){ if(st.hands.p1===i) d.insertAdjacentHTML('beforeend','<span class="hand">ponteiro 1 · desliga R</span>');
+                    if(st.hands.p2===i) d.insertAdjacentHTML('beforeend','<span class="hand h2">ponteiro 2 · confere</span>'); }
+      mem.appendChild(d);
+      const nm=document.createElement('div'); nm.className='pname'; nm.style.top=(y+fh/2)+'px'; nm.style.transform='translateY(-50%)'; nm.style.position='absolute'; nm.style.left='calc(100% + 8px)';
+      const r=st.rb? st.rb[i] : undefined;
+      nm.innerHTML=`Frame ${i}<small>${r==null? (i*4)+'–'+(i*4+4)+' KB' : 'R = '+r}</small>`; mem.appendChild(nm);
+      const a=document.createElement('span'); a.style.top=y+'px'; a.textContent=i*4; addr.appendChild(a); });
+    const a=document.createElement('span'); a.style.top=(H-2)+'px'; a.textContent=(n*4)+' KB'; addr.appendChild(a);
+  };
+  return wrap;
+}
+function uCard(id){ const P=UL[id]; const d=document.createElement('div'); d.className='card proc'; d.dataset.pid=id; d.style.background=`var(${P.c})`;
+  d.innerHTML=`<span class="L">${P.t}</span><span class="S">${P.s}</span><span class="tag">no disco</span>`; return d; }
+function usersCol(st){
+  const col=document.createElement('section'); col.className='col';
+  col.innerHTML='<h2>Processos · multiprogramação</h2>';
+  const body=document.createElement('div'); body.className='colbody'; col.appendChild(body);
+  const u=document.createElement('div'); u.className='users'; body.appendChild(u);
+  st.users.forEach(x=>{ const c=document.createElement('div'); c.className='ucard st-'+x.s;
+    c.innerHTML=`<span class="sw" style="background:var(${x.c})"></span><span class="un">${x.n} <small>PID ${x.pid}</small></span><span class="up">$ ${x.cmd}</span><span class="us">${USTATE[x.s]}</span>`; u.appendChild(c); });
+  u.insertAdjacentHTML('beforeend','<p class="note" style="margin:.4em 0 0">Vários programas carregados ao mesmo tempo, revezando a CPU (multiprogramação).</p>');
+  body._draw=()=>{}; return col;
+}
+function unixSide(st,col){
+  const t=document.createElement('div'); t.className='box';
+  t.innerHTML='<h3>Core map · quem está em cada frame</h3><table class="cm"><thead><tr><th>Frame</th><th>Conteúdo</th><th>PID</th></tr></thead><tbody>'+
+    st.frames.map((f,i)=>{ if(!f) return `<tr><td class="n">${i}</td><td>livre</td><td>–</td></tr>`;
+      const P=UL[f.id]; if(f.lg) return `<tr class="lg"><td class="n">${i}</td><td>lista livre (${P.t} ${P.s.split(' · ')[0]})</td><td>–</td></tr>`;
+      const hl=(st.hlf&&st.hlf.includes(i))||(st.sel&&st.sel.includes(i));
+      return `<tr${hl?' style="background:#fff4cc;font-weight:700"':''}><td class="n">${i}</td><td>${P.t} ${P.s}</td><td>${P.sh&&!st.sh?'101':P.o}</td></tr>`; }).join('')+'</tbody></table>';
+  col.appendChild(t);
+  const d=document.createElement('div'); d.className='box disk';
+  d.innerHTML='<h3>Disco · área de swap</h3>';
+  const dc=document.createElement('div'); dc.className='diskcards'; (st.disk||[]).forEach(p=>dc.appendChild(uCard(p))); if(!(st.disk||[]).length) dc.innerHTML='<span class="empty">vazio</span>';
+  d.appendChild(dc); col.appendChild(d);
 }
 
 /* ---------------- estado ---------------- */
@@ -311,7 +457,9 @@ function build(){
   else if(mode==='m3') steps=scenM3();
   else if(mode==='m4') steps= cmp? ['first','best','worst'].map(scenM4) : scenM4(strat);
   else if(mode==='m5') steps=scenM5();
-  else steps=scenM6();
+  else if(mode==='m7') steps=scenM7();
+  else if(mode==='m8') steps=scenM8();
+  else steps=scenM1();
 }
 const nSteps=()=> (mode==='m4'&&cmp)? steps[0].length : steps.length;
 const cur=()=> (mode==='m4'&&cmp)? steps[0][step] : steps[step];
@@ -319,9 +467,9 @@ const animOn=()=>document.getElementById('anim').checked;
 
 /* ---------------- render ---------------- */
 function progEl(p,tag,cls='card'){
-  const P=PROG[p]; const d=document.createElement('div'); d.className=cls+' proc'+(P.dark?' dark':''); d.dataset.pid=p;
+  const pg=!PROG[p]; const P=PROG[pg?p[0]:p]; const d=document.createElement('div'); d.className=cls+' proc'+(P.dark?' dark':''); d.dataset.pid=p;
   d.style.background=`var(${P.c})`;
-  const real=P.real; d.innerHTML=`<span class="L">${P.L}</span><span class="S">${sizeOf[p]} KB</span>${tag?`<span class="tag">${tag}</span>`:''}`;
+  const real=P.real; d.innerHTML= pg? `<span class="L">${p[0]}</span><span class="S">pág ${p.slice(1)}</span>${tag?`<span class="tag">${tag}</span>`:''}` : `<span class="L">${P.L}</span><span class="S">${sizeOf[p]} KB</span>${tag?`<span class="tag">${tag}</span>`:''}`;
   if(real && cls==='card') d.title=P.real;
   return d;
 }
@@ -353,6 +501,29 @@ function memDyn(st,opts={}){
   };
   wrap._draw=draw; return wrap;
 }
+function memPage(st){
+  const wrap=document.createElement('div'); wrap.className='memwrap parted';
+  const addr=document.createElement('div'); addr.className='addr';
+  const mem=document.createElement('div'); mem.className='mem';
+  wrap.append(addr,mem);
+  wrap._draw=()=>{
+    mem.innerHTML=''; addr.innerHTML=''; const H=mem.clientHeight||400, soH=Math.max(28,H*0.07);
+    const so=document.createElement('div'); so.className='blk so'; so.style.top='0'; so.style.height=soH+'px'; so.textContent='Sistema Operacional'; mem.appendChild(so);
+    const n=st.frames.length, fh=(H-soH)/n;
+    st.frames.forEach((f,i)=>{ const y=soH+i*fh;
+      const d=document.createElement('div'); d.style.top=y+'px'; d.style.height=fh+'px'; d.dataset.start=i;
+      if(f){ const P=PROG[f[0]]; d.className='blk proc'+(P.dark?' dark':''); d.dataset.pid=f; d.style.background=`var(${P.c})`;
+        d.innerHTML=`<span class="L">${f[0]}</span><span class="S">pág ${f.slice(1)}</span>`; }
+      else { d.className='blk free'; d.innerHTML='<span class="t">frame livre</span>'; }
+      if(st.hlf&&st.hlf.includes(i)) d.classList.add('chosen');
+      mem.appendChild(d);
+      const nm=document.createElement('div'); nm.className='pname'; nm.style.top=(y+fh/2)+'px'; nm.style.transform='translateY(-50%)'; nm.style.position='absolute'; nm.style.left='calc(100% + 8px)';
+      nm.innerHTML=`Frame ${i}<small>${i*4}–${i*4+4} KB</small>`; mem.appendChild(nm);
+      const a=document.createElement('span'); a.style.top=y+'px'; a.textContent=i*4; addr.appendChild(a); });
+    const a=document.createElement('span'); a.style.top=(H-2)+'px'; a.textContent=(n*4)+' KB'; addr.appendChild(a);
+  };
+  return wrap;
+}
 function memPart(st){
   const wrap=document.createElement('div'); wrap.className='memwrap parted';
   const addr=document.createElement('div'); addr.className='addr';
@@ -378,7 +549,7 @@ function memPart(st){
 }
 function queueCol(st,memWrap){
   const col=document.createElement('section'); col.className='col';
-  col.innerHTML=`<h2>${st.queues?'Filas (uma por partição)':'Fila de programas'}</h2>`;
+  col.innerHTML=`<h2 class="qh">${st.queues?'Filas (uma por partição)':'Fila de programas'}</h2>`;
   const body=document.createElement('div'); body.className='colbody'; col.appendChild(body);
   const waits=st.wait||[];
   if(st.queues){
@@ -386,7 +557,7 @@ function queueCol(st,memWrap){
       st.queues.forEach((qq,i)=>{ const r=rows[i]; if(!r) return; const row=document.createElement('div'); row.className='qrow'; row.style.top=r.top+'px'; row.style.height=r.h+'px';
         if(!qq.length){ row.innerHTML='<span class="empty">vazia</span>'; }
         qq.slice().reverse().forEach(p=>{ const c=progEl(p); if(waits.includes(p)){c.classList.add('wait'); c.insertAdjacentHTML('beforeend','<span class="w">esperando</span>');} row.appendChild(c); });
-        row.insertAdjacentHTML('beforeend','<span class="arrow">→</span>'); body.appendChild(row); }); };
+        row.insertAdjacentHTML('beforeend',`<span class="tie"><i>só na partição ${i+1}</i></span>`); body.appendChild(row); }); };
   } else {
     const qd=document.createElement('div'); qd.className='queue'; body.appendChild(qd);
     if(!st.queue.length) qd.innerHTML='<span class="empty">fila vazia</span>';
@@ -395,13 +566,37 @@ function queueCol(st,memWrap){
   }
   return col;
 }
+const KW={
+  m1:['Partição fixa','Código absoluto','Fila por partição','Partição ociosa','Fragmentação interna'],
+  m2:['Código relocável','Loader','Tabela de partições','Fila única','Fragmentação interna'],
+  m3:['Alocação dinâmica','Fragmentação externa','Compactação','Relocação','Junção de áreas livres'],
+  m4:['First-fit','Best-fit','Worst-fit','Área livre','Fragmentação externa'],
+  m5:['Swapping','Swap out','Swap in','Relocação dinâmica','Registrador de relocação'],
+  m8:['Multiprogramação','Paginação por demanda','Texto compartilhado','Page fault','Daemon page','Two-handed clock','Política global','Swapper','Core map'],
+  m7:['Memória virtual','Paginação','Página','Frame','Tabela de páginas','Working set','Arquivo de paginação']
+};
+const KWM={'Código absoluto':['absolut','compilad'],'Fila por partição':['sua fila','uma por partição'],'Partição ociosa':['ociosa'],'Código relocável':['relocáv'],'Loader':['loader'],'Fila única':['fila só'],
+  'Tabela de partições':['tabela'],'Relocação':['relocação'],'Junção de áreas livres':['junção'],'Área livre':['área livre','bloco'],'Swap out':['swap out'],'Swap in':['swap in'],
+  'Registrador de relocação':['registrador'],'Relocação dinâmica':['relocação dinâmica'],'Paginação por demanda':['por demanda'],'Texto compartilhado':['compartilha'],
+  'Daemon page':['daemon page'],'Two-handed clock':['two-handed','ponteiro'],'Política global':['global'],'Swapper':['swapper'],'Core map':['core map'],
+  'Multiprogramação':['multiprogram','dividem a memória'],'Memória virtual':['memória virtual'],'Paginação':['paginação'],'Página':['página'],'Frame':['frame'],'Tabela de páginas':['tabela de páginas'],
+  'Working set':['working set'],'Arquivo de paginação':['arquivo de paginação'],'Partição fixa':['partição fixa'],'Alocação dinâmica':['alocação dinâmica']};
+function kwBox(st){ const list=KW[mode]; if(!list) return null; const m=(st.msg||'').toLowerCase();
+  const b=document.createElement('div'); b.className='box kw'; b.innerHTML='<h3>Palavras-chave</h3>'+
+    list.map(k=>{ const keys=KWM[k]||[k.toLowerCase()]; const on=keys.some(x=>m.includes(x)); return `<span class="kwc${on?' on':''}">${k}</span>`; }).join('');
+  return b; }
 function sideCol(st){
   const col=document.createElement('section'); col.className='col side';
+  const kb=kwBox(st); if(kb) col.appendChild(kb);
+  if(st.kind==='unix'){ unixSide(st,col); return col; }
   if(st.table){ const t=document.createElement('div'); t.className='box';
     t.innerHTML='<h3>Tabela de partições</h3><table><thead><tr><th>Partição</th><th>Tamanho</th><th>Livre?</th></tr></thead><tbody>'+
       st.parts.map((p,i)=>`<tr><td>${i+1}</td><td class="n">${p.z} KB</td><td><b>${p.p?'Não':'Sim'}</b></td></tr>`).join('')+'</tbody></table>'; col.appendChild(t); }
+  if(st.kind==='page'){ const rows=[]; st.frames.forEach((f,i)=>{ if(f) rows.push([f[0],+f.slice(1),'frame '+i]); }); (st.disk||[]).forEach(f=>rows.push([f[0],+f.slice(1),'disco'])); rows.sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:a[1]-b[1]);
+    const t=document.createElement('div'); t.className='box'; t.innerHTML='<h3>Tabela de páginas</h3><table><thead><tr><th>Processo</th><th>Página</th><th>Onde está</th></tr></thead><tbody>'+
+      rows.map(r=>`<tr${st.hlp&&st.hlp.includes(r[0])?' style="background:#fff4cc;font-weight:700"':''}><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td></tr>`).join('')+'</tbody></table>'; col.appendChild(t); }
   if(st.swap){ const d=document.createElement('div'); d.className='box disk';
-    d.innerHTML='<h3>Disco (área de swap)</h3><svg viewBox="0 0 64 56" aria-hidden="true"><ellipse cx="32" cy="10" rx="28" ry="8" fill="#ddd" stroke="#111" stroke-width="2"/><path d="M4 10v34c0 4.4 12.5 8 28 8s28-3.6 28-8V10" fill="#ddd" stroke="#111" stroke-width="2"/><path d="M4 27c0 4.4 12.5 8 28 8s28-3.6 28-8" fill="none" stroke="#111" stroke-width="2"/></svg>';
+    d.innerHTML='<h3>'+(st.kind==='page'?'Disco · arquivo de paginação':'Disco (área de swap)')+'</h3><svg viewBox="0 0 64 56" aria-hidden="true"><ellipse cx="32" cy="10" rx="28" ry="8" fill="#ddd" stroke="#111" stroke-width="2"/><path d="M4 10v34c0 4.4 12.5 8 28 8s28-3.6 28-8V10" fill="#ddd" stroke="#111" stroke-width="2"/><path d="M4 27c0 4.4 12.5 8 28 8s28-3.6 28-8" fill="none" stroke="#111" stroke-width="2"/></svg>';
     const dc=document.createElement('div'); dc.className='diskcards'; (st.disk||[]).forEach(p=>dc.appendChild(progEl(p,'no disco'))); if(!(st.disk||[]).length) dc.innerHTML='<span class="empty">vazio</span>';
     d.appendChild(dc); col.appendChild(d); }
   if(mode==='m5'){ const r=document.createElement('div'); r.className='box';
@@ -414,6 +609,9 @@ function sideCol(st){
 
 function counters(st){
   const el=document.getElementById('counters'); let free,areas,maior,waste,wl;
+  if(st.kind==='unix'){ const lv=st.frames.filter(f=>!f||f.lg).length, vi=st.frames.filter(f=>f&&!f.lg&&(f.id==='V0')).length;
+    el.innerHTML=`<div class="${st.lack?'bad':''}">Lista de páginas livres <b>${lv} frame${lv===1?'':'s'}</b></div><div>Cópias do código do grep na memória <b>${vi}</b></div><div>Fragmentação externa <b>0 KB</b></div>`; return; }
+  if(st.kind==='page'){ const fr=st.frames.filter(f=>!f).length; el.innerHTML=`<div>Frames livres <b>${fr} × 4 KB = ${fr*4} KB</b></div><div>Fragmentação externa <b>0 KB</b> (qualquer frame serve)</div>`; return; }
   if(st.kind==='part'){ const fp=st.parts.filter(p=>!p.p); free=fp.reduce((a,p)=>a+p.z,0); areas=fp.length; maior=fp.reduce((a,p)=>Math.max(a,p.z),0);
     waste=st.parts.filter(p=>p.p).reduce((a,p)=>a+(p.z-sizeOf[p.p]),0); free+=waste; wl='Desperdício (frag. interna)'; }
   else { const fp=dynFree(st.mem); free=fp.reduce((a,b)=>a+b.z,0); areas=fp.length; maior=fp.reduce((a,b)=>Math.max(a,b.z),0); waste=free-maior; wl='Fragmentado (frag. externa)'; }
@@ -433,10 +631,10 @@ function flip(prev){
 function drawStage(st,prev,memOverride){
   const stage=document.getElementById('stage'); stage.className='stage'; stage.innerHTML='';
   const memCol=document.createElement('section'); memCol.className='col';
-  memCol.innerHTML=`<h2>Memória principal${st.total?` · ${st.total} KB`:''}</h2>`;
+  memCol.innerHTML=`<h2 class="mh">Memória principal${st.total?` · ${st.total} KB`:''}${st.kind==='unix'?' · frames de 4 KB':''}${st.kind==='page'?' <span class="vm">memória virtual · paginação, não swapping</span>':''}</h2>`;
   const mb=document.createElement('div'); mb.className='colbody'; memCol.appendChild(mb);
-  const mw= st.kind==='part'? memPart(st) : memDyn(st,{hlp:st.hlp}); mb.appendChild(mw);
-  const qc=queueCol(st,mw);
+  const mw= st.kind==='part'? memPart(st) : st.kind==='page'? memPage(st) : st.kind==='unix'? memUnix(st) : memDyn(st,{hlp:st.hlp}); mb.appendChild(mw);
+  const qc= st.kind==='unix'? usersCol(st) : queueCol(st,mw);
   stage.append(qc,memCol,sideCol(st));
   mw._draw(memOverride||st.mem); qc.querySelector('.colbody')._draw();
   flip(prev);
@@ -508,7 +706,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.closest('select,input')) return; const k=e.key.toLowerCase();
   if(k==='arrowright'){e.preventDefault();stop();go(1);} else if(k==='arrowleft'){e.preventDefault();stop();go(-1);}
   else if(k===' '){e.preventDefault();play();} else if(k==='r'){stop();step=0;render();} else if(k==='f'){full();}
-  else if('12345'.includes(k)&&k.length===1){setMode('m'+k);} else if(k==='n'){setMode('m6');}
+  else if('12345'.includes(k)&&k.length===1){setMode('m'+k);} else if(k==='w'){setMode('m7');} else if(k==='u'){setMode('m8');}
   else if(mode==='m4'&&k==='s'){ const o=['first','best','worst']; cmp=false; strat=o[(o.indexOf(strat)+1)%3]; build(); render(); }
   else if(mode==='m4'&&k==='c'){ cmp=!cmp; build(); render(); }
 });
