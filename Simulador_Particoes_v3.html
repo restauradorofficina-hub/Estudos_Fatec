@@ -6,7 +6,7 @@
 :root{
   color-scheme:light;
   --bg:#f2f2f0; --paper:#ffffff; --ink:#111111; --ink2:#4a4a4a; --rule:#c9c9c4; --so:#8c8c8c;
-  --A:#2E75B6; --B:#548235; --C:#C55A11; --D:#7030A0; --E:#BF8F00; --F:#1F6F78;
+  --A:#2E75B6; --B:#548235; --C:#C55A11; --D:#7030A0; --E:#A8325E; --F:#1F6F78;
   --waste:#c00000; --mark:#3B1E5E; --roxo:#3B1E5E; --hl:#FFC000;
   --sans:"Segoe UI",Arial,Helvetica,sans-serif;
   --mono:Consolas,"Courier New",monospace;
@@ -78,8 +78,10 @@ header h1 small{display:block;font-size:.62em;font-weight:400;color:var(--ink2)}
 .target::after{content:attr(data-tlabel);position:absolute;top:4px;right:6px;font-size:.62em;font-weight:700;background:var(--roxo);color:var(--hl);padding:0 .35em}
 .nofit::after{content:"não cabe";position:absolute;top:2px;right:4px;font-size:.6em;font-weight:700;background:var(--waste);color:#fff;padding:0 .3em}
 /* queue */
-.queue{display:flex;flex-direction:column;gap:1.5em;align-items:flex-end;height:100%;overflow:hidden;padding-top:1.2em;padding-right:4px}
-.qrow{position:absolute;left:0;right:0;display:flex;gap:6px;align-items:center;justify-content:flex-end;padding-right:4px}
+.queue{display:flex;flex-direction:column;gap:1.5em;align-items:center;height:100%;overflow:hidden;padding-top:1.2em;padding-right:4px}
+.qrow{position:absolute;left:0;right:0;display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;padding-right:4px}
+.qrow .cards{grid-column:2;display:flex;gap:6px;align-items:center}
+.qrow .empty{grid-column:2}
 .qrow .arrow{font-size:1.2em;color:var(--ink2)}
 .card{display:flex;align-items:center;gap:.45em;padding:.25em .55em;min-width:4.6em;justify-content:center;border:2px solid #111;position:relative}
 .card .L{font-size:1.15em}
@@ -150,15 +152,23 @@ td.n{font-family:var(--mono)}
 .wuside .diskcards .card{font-size:.85em;min-width:0;padding:.15em .4em}
 .lpm{background:repeating-linear-gradient(135deg,#fff 0 8px,#fde3c8 8px 12px)!important;outline-color:var(--C)!important;color:#7a3300!important}
 /* v3.4 */
+.pgroup{border:2px dashed var(--roxo);padding:.35em .45em .45em;display:flex;flex-direction:column;gap:.45em;align-items:center;background:#fff}
+.pgroup .gh{font-size:.62em;font-weight:800;color:var(--roxo);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.wholecard{flex-direction:column;gap:.15em;padding:.4em .9em;min-width:7em}
+.wholecard .cuts{display:flex;flex-direction:column;width:100%;margin-top:.2em}
+.wholecard .cuts i{font-style:normal;font-family:var(--mono);font-size:.72em;padding:.35em 0;border-top:2px dashed #fff;text-align:center}
+.col.side.pg table td,.col.side.pg table th{padding-top:1px;padding-bottom:1px}
+.col.side.pg .diskcards .card{font-size:.85em}
 .box.kw .ref{flex-basis:100%;margin-top:4px;border-left:6px solid var(--hl);padding:2px 8px;background:#f6f3f9}
 .col.side.pg .disk svg{display:none}
 .part.owned{outline:3px dashed var(--roxo);outline-offset:-3px}
 .pname .own{display:block;font-style:normal;font-size:.85em;font-weight:800;color:#fff;background:var(--roxo);padding:0 .35em;margin-top:2px;width:max-content}
 .pname .own.vaga{background:#fff;color:var(--ink2);border:1px dashed #7d7d7d;font-weight:600}
-.col h2.qh{text-align:right;padding-right:4px}
-.col h2.mh{padding-left:4em}
-.col h2 .vm{display:inline-block;margin-left:.6em;background:var(--hl);color:var(--roxo);padding:0 .5em;letter-spacing:.04em;font-weight:800}
-.qrow .tie{flex:none;position:relative;width:calc(28px + 3.2em + 14px);margin-right:calc(-28px - 3.2em - 4px);border-top:3px dashed var(--roxo);height:0;align-self:center}
+.col h2.qh{text-align:center}
+.col h2.mh{padding-left:4em;text-align:center}
+.col h2.mh.mhp{padding-right:8.125em}
+.col h2 .vm{display:block;width:max-content;margin:3px auto 0;background:var(--hl);color:var(--roxo);padding:0 .5em;letter-spacing:.04em;font-weight:800}
+.qrow .tie{grid-column:3;position:relative;margin-right:calc(-28px - 3.2em - 4px);border-top:3px dashed var(--roxo);height:0;align-self:center}
 .qrow .tie::after{content:'';position:absolute;right:-2px;top:-8px;border:6px solid transparent;border-left:9px solid var(--roxo)}
 .qrow .tie i{position:absolute;left:0;top:4px;font-style:normal;font-size:.6em;font-weight:700;color:var(--roxo);white-space:nowrap}
 .box.kw{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
@@ -221,7 +231,7 @@ td.n{font-family:var(--mono)}
 <script>
 /* ---------------- programas ---------------- */
 const PROG = {
-  A:{L:'A',c:'--A'}, B:{L:'B',c:'--B'}, C:{L:'C',c:'--C'}, D:{L:'D',c:'--D'}, E:{L:'E',c:'--E',dark:true}, F:{L:'F',c:'--F'},
+  A:{L:'A',c:'--A'}, B:{L:'B',c:'--B'}, C:{L:'C',c:'--C'}, D:{L:'D',c:'--D'}, E:{L:'E',c:'--E'}, F:{L:'F',c:'--F'},
   SI:{L:'Space Invaders',c:'--A',real:'fliperama, 1978'}, PM:{L:'Pac-Man',c:'--E',dark:true,real:'fliperama, 1980'},
   AT:{L:'Pitfall!',c:'--C',real:'Atari 2600, 1982'}, MB:{L:'Super Mario Bros.',c:'--D',real:'NES, 1985'},
   TP:{L:'Turbo Pascal 1.0',c:'--B',real:'1983'}
@@ -341,9 +351,10 @@ function scenM7(){
   let fr=['B0',null,'C0','C1',null,'E0','E1',null], disk=[], q=['D'];
   const push=(msg,extra={})=>S.push({kind:'page',total:32,frames:fr.slice(),queue:q.slice(),disk:disk.slice(),swap:true,msg,...extra});
   push('MEMÓRIA VIRTUAL por paginação, no exemplo do Windows 2000: a memória é dividida em frames de 4 KB (tamanho da página no Pentium) e cada programa em páginas do mesmo tamanho (Machado; Maia, 2007, p. 277).',{wait:['D']});
-  q=['D0','D1','D2']; push('D (12 KB) é dividido em 3 páginas de 4 KB.');
-  fr[1]='D0'; fr[4]='D1'; fr[7]='D2'; q=[]; push('As páginas de D vão para os frames 1, 4 e 7, mesmo separados. A tabela de páginas guarda onde cada uma está: D entrou sem espaço contíguo e a fragmentação externa desapareceu.',{hlf:[1,4,7],hlp:['D']});
-  q=['F0','F1']; sizeOf.F=8; push('Chega F (8 KB = 2 páginas) e não há nenhum frame livre.',{wait:['F0','F1']});
+  q=['D0','D1','D2']; push('Atenção: D continua sendo UM programa só, de 12 KB. A paginação apenas marca onde cortar: a cada 4 KB, o tamanho de um frame.',{whole:'D',hlp:['D']});
+  push('D é cortado em 3 páginas de 4 KB: pág 0, pág 1 e pág 2. As três são pedaços do MESMO programa, por isso têm a mesma cor e a mesma letra.',{hlp:['D']});
+  fr[1]='D0'; fr[4]='D1'; fr[7]='D2'; q=[]; push('As 3 páginas do programa D vão para os frames 1, 4 e 7, mesmo separados. D está inteiro na memória, só que espalhado: a tabela de páginas guarda onde está cada pedaço. A fragmentação externa desapareceu.',{hlf:[1,4,7],hlp:['D']});
+  q=['F0','F1']; sizeOf.F=8; push('Chega outro programa, F (8 KB), já cortado em 2 páginas. Não há nenhum frame livre.',{wait:['F0','F1']});
   fr[5]=null; fr[6]=null; disk=['E0','E1']; push('E está parado: as páginas dele saem do working set e vão para o arquivo de paginação (p. 280). Isto NÃO é swapping: E continua na memória virtual e cada página volta sozinha, quando for usada.',{wait:['F0','F1'],hlp:['E']});
   fr[5]='F0'; fr[6]='F1'; q=[]; push('F ocupa os frames que E liberou.',{hlf:[5,6],hlp:['F']});
   fr[0]=null; push('B foi FECHADO: o frame 0 ficou livre.',{closed:['B0']});
@@ -364,8 +375,8 @@ const USTATE={fora:'não iniciado',ativo:'executando',parado:'bloqueado (E/S)',e
 function scenM8(){
   const S=[]; let fr=[null,null,null,null,null,null,null,null], disk=[];
   const U=(a,b,c,d)=>[
-    {n:'grep',pid:101,cmd:'grep erro log1.txt',c:'--A',s:a},
-    {n:'grep',pid:102,cmd:'grep aviso log2.txt',c:'--B',s:b},
+    {n:'grep',pid:101,cmd:'grep main programa.c',c:'--A',s:a},
+    {n:'grep',pid:102,cmd:'grep for exemplo.c',c:'--B',s:b},
     {n:'sort',pid:103,cmd:'sort nomes.txt',c:'--C',s:c},
     {n:'cat',pid:104,cmd:'cat relatorio.txt',c:'--F',s:d}];
   const F=id=>({id}), L=id=>({id,lg:1});
@@ -562,12 +573,23 @@ function queueCol(st,memWrap){
     body._draw=()=>{ body.innerHTML=''; const rows=memWrap._rows||[];
       st.queues.forEach((qq,i)=>{ const r=rows[i]; if(!r) return; const row=document.createElement('div'); row.className='qrow'; row.style.top=r.top+'px'; row.style.height=r.h+'px';
         if(!qq.length){ row.innerHTML='<span class="empty">vazia</span>'; }
-        qq.slice().reverse().forEach(p=>{ const c=progEl(p); if(waits.includes(p)){c.classList.add('wait'); c.insertAdjacentHTML('beforeend','<span class="w">esperando</span>');} row.appendChild(c); });
+        const cw=document.createElement('span'); cw.className='cards'; if(qq.length) row.appendChild(cw);
+        qq.slice().reverse().forEach(p=>{ const c=progEl(p); if(waits.includes(p)){c.classList.add('wait'); c.insertAdjacentHTML('beforeend','<span class="w">esperando</span>');} cw.appendChild(c); });
         row.insertAdjacentHTML('beforeend',`<span class="tie"><i>só na partição ${i+1}</i></span>`); body.appendChild(row); }); };
   } else {
     const qd=document.createElement('div'); qd.className='queue'; body.appendChild(qd);
     if(!st.queue.length) qd.innerHTML='<span class="empty">fila vazia</span>';
-    st.queue.forEach(p=>{ const c=progEl(p); if(waits.includes(p)){c.classList.add('wait'); c.insertAdjacentHTML('beforeend','<span class="w">esperando</span>');} if(st.real){c.insertAdjacentHTML('beforeend','');} qd.appendChild(c); });
+    const groups={};
+    st.queue.forEach(p=>{ const c=progEl(p); if(waits.includes(p)){c.classList.add('wait'); c.insertAdjacentHTML('beforeend','<span class="w">esperando</span>');}
+      if(!PROG[p]&&st.whole===p[0]){ const L=p[0]; if(groups[L]) return;
+        const g=groups[L]=document.createElement('div'); g.className='pgroup whole'; const n=st.queue.filter(x=>x[0]===L).length;
+        g.innerHTML=`<div class="gh">programa ${L} · ${sizeOf[L]} KB</div><div class="card proc wholecard" style="background:var(${PROG[L].c})"><span class="L">${L}</span><span class="S">${sizeOf[L]} KB</span><span class="cuts">${Array.from({length:n},(_,k)=>`<i>4 KB</i>`).join('')}</span></div><div class="gh" style="color:var(--ink2)">corte a cada 4 KB</div>`;
+        qd.appendChild(g); return; }
+      if(!PROG[p]){ const L=p[0]; let g=groups[L];
+        if(!g){ const n=st.queue.filter(x=>!PROG[x]&&x[0]===L).length; g=groups[L]=document.createElement('div'); g.className='pgroup'+(st.whole===L?' whole':'');
+          g.innerHTML=`<div class="gh">programa ${L} · ${sizeOf[L]} KB${st.whole===L?'':` = ${n} páginas`}</div>`; qd.appendChild(g); }
+        g.appendChild(c); }
+      else qd.appendChild(c); });
     body._draw=()=>{};
   }
   return col;
@@ -638,7 +660,7 @@ function flip(prev){
 function drawStage(st,prev,memOverride){
   const stage=document.getElementById('stage'); stage.className='stage'; stage.innerHTML='';
   const memCol=document.createElement('section'); memCol.className='col';
-  memCol.innerHTML=`<h2 class="mh">Memória principal${st.total?` · ${st.total} KB`:''}${st.kind==='unix'?' · frames de 4 KB':''}${st.kind==='page'?' <span class="vm">memória virtual · paginação, não swapping</span>':''}</h2>`;
+  memCol.innerHTML=`<h2 class="mh${st.kind==='dyn'?'':' mhp'}">Memória principal${st.total?` · ${st.total} KB`:''}${st.kind==='page'?' <span class="vm">memória virtual · paginação, não swapping</span>':''}</h2>`;
   const mb=document.createElement('div'); mb.className='colbody'; memCol.appendChild(mb);
   const mw= st.kind==='part'? memPart(st) : st.kind==='page'? memPage(st) : st.kind==='unix'? memUnix(st) : memDyn(st,{hlp:st.hlp}); mb.appendChild(mw);
   const qc= st.kind==='unix'? usersCol(st) : queueCol(st,mw);
@@ -701,7 +723,7 @@ function play(){ if(playing){stop();return;} if(step>=nSteps()-1){step=0;render(
   playing=setInterval(()=>{ if(busy) return; if(step>=nSteps()-1){stop();return;} go(1); }, 2600); }
 document.getElementById('modes').addEventListener('click',e=>{const b=e.target.closest('button'); if(b) setMode(b.dataset.m);});
 document.getElementById('strat').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; stop();
-  if(b.dataset.s==='cmp'){ cmp=!cmp; } else { cmp=false; strat=b.dataset.s; } build(); render(); });
+  if(b.dataset.s==='cmp'){ cmp=!cmp; } else { cmp=false; strat=b.dataset.s; } step=0; build(); render(); });
 document.getElementById('bBack').onclick=()=>go(-1);
 document.getElementById('bNext').onclick=()=>go(1);
 document.getElementById('bPlay').onclick=play;
@@ -714,8 +736,8 @@ document.addEventListener('keydown',e=>{
   if(k==='arrowright'){e.preventDefault();stop();go(1);} else if(k==='arrowleft'){e.preventDefault();stop();go(-1);}
   else if(k===' '){e.preventDefault();play();} else if(k==='r'){stop();step=0;render();} else if(k==='f'){full();}
   else if('12345'.includes(k)&&k.length===1){setMode('m'+k);} else if(k==='w'||k==='v'){setMode('m7');} else if(k==='u'){setMode('m8');}
-  else if(mode==='m4'&&k==='s'){ const o=['first','best','worst']; cmp=false; strat=o[(o.indexOf(strat)+1)%3]; build(); render(); }
-  else if(mode==='m4'&&k==='c'){ cmp=!cmp; build(); render(); }
+  else if(mode==='m4'&&k==='s'){ const o=['first','best','worst']; cmp=false; strat=o[(o.indexOf(strat)+1)%3]; step=0; build(); render(); }
+  else if(mode==='m4'&&k==='c'){ stop(); cmp=!cmp; step=0; build(); render(); }
 });
 
 function fit(){ const app=document.querySelector('.app');
