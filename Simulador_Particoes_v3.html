@@ -150,6 +150,11 @@ td.n{font-family:var(--mono)}
 .wuside .diskcards .card{font-size:.85em;min-width:0;padding:.15em .4em}
 .lpm{background:repeating-linear-gradient(135deg,#fff 0 8px,#fde3c8 8px 12px)!important;outline-color:var(--C)!important;color:#7a3300!important}
 /* v3.4 */
+.box.kw .ref{flex-basis:100%;margin-top:4px;border-left:6px solid var(--hl);padding:2px 8px;background:#f6f3f9}
+.col.side.pg .disk svg{display:none}
+.part.owned{outline:3px dashed var(--roxo);outline-offset:-3px}
+.pname .own{display:block;font-style:normal;font-size:.85em;font-weight:800;color:#fff;background:var(--roxo);padding:0 .35em;margin-top:2px;width:max-content}
+.pname .own.vaga{background:#fff;color:var(--ink2);border:1px dashed #7d7d7d;font-weight:600}
 .col h2.qh{text-align:right;padding-right:4px}
 .col h2.mh{padding-left:4em}
 .col h2 .vm{display:inline-block;margin-left:.6em;background:var(--hl);color:var(--roxo);padding:0 .5em;letter-spacing:.04em;font-weight:800}
@@ -185,7 +190,7 @@ td.n{font-family:var(--mono)}
       <button id="m4" data-m="m4" title="First, Best e Worst-fit (tecla 4)">Estratégias</button>
       <button id="m5" data-m="m5" title="Swapping (tecla 5)">Swapping</button>
       <button id="m8" data-m="m8" title="Estudo de caso: Unix, multiprogramação (tecla U)">Unix</button>
-      <button id="m7" data-m="m7" title="Estudo de caso: Windows 2000, memória virtual por paginação (tecla W)">Windows</button>
+      <button id="m7" data-m="m7" title="Memória virtual: referência ao tema de outro grupo (tecla V)">Memória Virtual</button>
     </nav>
     <div class="sub" id="strat" hidden>
       <button id="s-first" data-s="first" title="A primeira área que cabe">First-fit</button>
@@ -270,11 +275,11 @@ function scenM2(){
   const S=[]; const parts=[{z:2,p:null},{z:5,p:null},{z:8,p:null}];
   let q=['C','A','E','B','D']; Object.assign(sizeOf,{A:2,B:4,C:1,D:6,E:3});
   const push=(msg,extra={})=>S.push({kind:'part',parts:clone(parts),queue:clone(q),msg,table:true,...extra});
-  push('Partição fixa relocável: o código é relocável, então o programa pode ir para qualquer partição livre onde caiba. Há uma fila só.');
+  push('Partição fixa relocável: o código é relocável, então o programa pode ir para qualquer partição livre onde caiba. Há uma fila só, e cada partição recebe um programa por vez.');
   parts[0].p='C'; q.shift(); push('C (1 KB) vai para a primeira partição livre onde cabe: a partição 1 (2 KB). O SO marca a partição como ocupada na tabela.',{moved:'C',hl:[0]});
   parts[1].p='A'; q.shift(); push('A (2 KB) vai para a partição 2, porque a 1 está ocupada. Com código absoluto, A só poderia usar a partição 1.',{moved:'A',hl:[1]});
   parts[2].p='E'; q.shift(); push('E (3 KB) vai para a partição 3. Com código absoluto isso seria impossível: o loader recalcula os endereços de E para o novo início.',{moved:'E',hl:[2]});
-  push('B (4 KB) é o próximo, mas as três partições estão ocupadas. B espera.',{wait:['B']});
+  push('B (4 KB) é o próximo, mas as três partições estão ocupadas, uma por programa. B espera, mesmo cabendo nos 5 KB que sobram na partição 3: aquela partição já é de E.',{wait:['B']});
   push('D (6 KB) também espera. Somando as sobras há 1 + 3 + 5 = 9 KB livres, mas presos dentro das partições ocupadas: fragmentação interna (Figura 3 do relatório).',{wait:['B','D']});
   return S;
 }
@@ -332,10 +337,10 @@ function scenM5(){
 function scenM7(){
   const S=[]; Object.assign(sizeOf,{B:4,C:8,E:8,D:12,F:8});
   S.push({kind:'dyn',total:32,mem:[{s:0,z:4,p:'B'},{s:4,z:4,p:null},{s:8,z:8,p:'C'},{s:16,z:4,p:null},{s:20,z:8,p:'E'},{s:28,z:4,p:null}],queue:['D'],wait:['D'],
-    msg:'O problema do cap. 9: há 12 KB livres, mas em três pedaços de 4 KB. D precisa de 12 KB contíguos e não entra (fragmentação externa). Como o Windows 2000 resolve isso?'});
+    msg:'O problema do cap. 9: há 12 KB livres, mas em três pedaços de 4 KB. D precisa de 12 KB contíguos e não entra (fragmentação externa). A memória virtual resolve isso (referência: tema de outro grupo, cap. 10).'});
   let fr=['B0',null,'C0','C1',null,'E0','E1',null], disk=[], q=['D'];
   const push=(msg,extra={})=>S.push({kind:'page',total:32,frames:fr.slice(),queue:q.slice(),disk:disk.slice(),swap:true,msg,...extra});
-  push('Windows 2000 usa MEMÓRIA VIRTUAL por paginação: a memória é dividida em frames de 4 KB (tamanho da página no Pentium) e cada programa em páginas do mesmo tamanho (Machado; Maia, 2007, p. 277).',{wait:['D']});
+  push('MEMÓRIA VIRTUAL por paginação, no exemplo do Windows 2000: a memória é dividida em frames de 4 KB (tamanho da página no Pentium) e cada programa em páginas do mesmo tamanho (Machado; Maia, 2007, p. 277).',{wait:['D']});
   q=['D0','D1','D2']; push('D (12 KB) é dividido em 3 páginas de 4 KB.');
   fr[1]='D0'; fr[4]='D1'; fr[7]='D2'; q=[]; push('As páginas de D vão para os frames 1, 4 e 7, mesmo separados. A tabela de páginas guarda onde cada uma está: D entrou sem espaço contíguo e a fragmentação externa desapareceu.',{hlf:[1,4,7],hlp:['D']});
   q=['F0','F1']; sizeOf.F=8; push('Chega F (8 KB = 2 páginas) e não há nenhum frame livre.',{wait:['F0','F1']});
@@ -343,7 +348,7 @@ function scenM7(){
   fr[5]='F0'; fr[6]='F1'; q=[]; push('F ocupa os frames que E liberou.',{hlf:[5,6],hlp:['F']});
   fr[0]=null; push('B foi FECHADO: o frame 0 ficou livre.',{closed:['B0']});
   fr[0]='E0'; disk=['E1']; push('E volta a executar e precisa da página 0: ela é lida do arquivo de paginação para o frame 0, um lugar diferente do original. Só a página usada volta, não o processo inteiro.',{hlf:[0],hlp:['E']});
-  push('Resumo: o Windows usa MEMÓRIA VIRTUAL por paginação. Qualquer frame livre serve (fim da fragmentação externa) e só páginas vão e voltam do disco, nunca o processo inteiro como no swapping. Detalhes no cap. 10.');
+  push('Resumo: na MEMÓRIA VIRTUAL por paginação, qualquer frame livre serve (fim da fragmentação externa) e só páginas vão e voltam do disco, nunca o processo inteiro como no swapping. O tema completo é apresentado pelo grupo de Memória Virtual (cap. 10).');
   return S;
 }
 
@@ -539,9 +544,10 @@ function memPart(st){
       if(p.p){ const z=sizeOf[p.p], oh=Math.max(30,hs[i]*z/p.z);
         const o=document.createElement('div'); o.className='occ proc'+(PROG[p.p].dark?' dark':''); o.dataset.pid=p.p; o.style.background=`var(${PROG[p.p].c})`; o.style.height=Math.min(oh,hs[i]-(z<p.z?20:0))+'px';
         o.innerHTML=`<span class="L">${PROG[p.p].L}</span><span class="S">${z} KB</span>`; d.appendChild(o);
-        if(z<p.z){ const w=document.createElement('div'); w.className='waste'; w.style.top=Math.min(oh,hs[i]-20)+'px'; w.textContent=`sobra ${p.z-z} KB`; d.appendChild(w); }
+        if(z<p.z){ const w=document.createElement('div'); w.className='waste'; w.style.top=Math.min(oh,hs[i]-20)+'px'; w.textContent= st.table? `sobra ${p.z-z} KB · ninguém mais entra` : `sobra ${p.z-z} KB`; d.appendChild(w); }
       } else { const f=document.createElement('div'); f.className='pfree'; f.textContent='livre'; d.appendChild(f); }
-      const nm=document.createElement('div'); nm.className='pname'; nm.innerHTML=`Partição ${i+1}<small>${p.z} KB</small>`; d.appendChild(nm);
+      const nm=document.createElement('div'); nm.className='pname'; nm.innerHTML=`Partição ${i+1}<small>${p.z} KB</small>${st.table?(p.p?`<em class="own">ocupada por ${p.p}</em>`:'<em class="own vaga">livre</em>'):''}`; d.appendChild(nm);
+      if(st.table&&p.p) d.classList.add('owned');
       mem.appendChild(d); wrap._rows.push({top:y,h:hs[i]}); y+=hs[i];
     });
   };
@@ -588,10 +594,11 @@ function kwBox(st){ const list=KW[mode]; if(!list) return null; const m=(st.msg|
 function sideCol(st){
   const col=document.createElement('section'); col.className='col side';
   const kb=kwBox(st); if(kb) col.appendChild(kb);
+  if(mode==='m7'){ (kb||col).insertAdjacentHTML('beforeend','<div class="ref"><b>Referência:</b> tema de outro grupo do seminário (cap. 10)</div>'); if(st.kind==='page') col.classList.add('pg'); }
   if(st.kind==='unix'){ unixSide(st,col); return col; }
   if(st.table){ const t=document.createElement('div'); t.className='box';
-    t.innerHTML='<h3>Tabela de partições</h3><table><thead><tr><th>Partição</th><th>Tamanho</th><th>Livre?</th></tr></thead><tbody>'+
-      st.parts.map((p,i)=>`<tr><td>${i+1}</td><td class="n">${p.z} KB</td><td><b>${p.p?'Não':'Sim'}</b></td></tr>`).join('')+'</tbody></table>'; col.appendChild(t); }
+    t.innerHTML='<h3>Tabela de partições</h3><table><thead><tr><th>Partição</th><th>Tamanho</th><th>Programa</th><th>Livre?</th></tr></thead><tbody>'+
+      st.parts.map((p,i)=>`<tr><td>${i+1}</td><td class="n">${p.z} KB</td><td><b>${p.p||'–'}</b></td><td><b>${p.p?'Não':'Sim'}</b></td></tr>`).join('')+'</tbody></table><p class="note" style="margin:.4em 0 0">Um programa por partição, de cada vez.</p>'; col.appendChild(t); }
   if(st.kind==='page'){ const rows=[]; st.frames.forEach((f,i)=>{ if(f) rows.push([f[0],+f.slice(1),'frame '+i]); }); (st.disk||[]).forEach(f=>rows.push([f[0],+f.slice(1),'disco'])); rows.sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:a[1]-b[1]);
     const t=document.createElement('div'); t.className='box'; t.innerHTML='<h3>Tabela de páginas</h3><table><thead><tr><th>Processo</th><th>Página</th><th>Onde está</th></tr></thead><tbody>'+
       rows.map(r=>`<tr${st.hlp&&st.hlp.includes(r[0])?' style="background:#fff4cc;font-weight:700"':''}><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td></tr>`).join('')+'</tbody></table>'; col.appendChild(t); }
@@ -706,7 +713,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.closest('select,input')) return; const k=e.key.toLowerCase();
   if(k==='arrowright'){e.preventDefault();stop();go(1);} else if(k==='arrowleft'){e.preventDefault();stop();go(-1);}
   else if(k===' '){e.preventDefault();play();} else if(k==='r'){stop();step=0;render();} else if(k==='f'){full();}
-  else if('12345'.includes(k)&&k.length===1){setMode('m'+k);} else if(k==='w'){setMode('m7');} else if(k==='u'){setMode('m8');}
+  else if('12345'.includes(k)&&k.length===1){setMode('m'+k);} else if(k==='w'||k==='v'){setMode('m7');} else if(k==='u'){setMode('m8');}
   else if(mode==='m4'&&k==='s'){ const o=['first','best','worst']; cmp=false; strat=o[(o.indexOf(strat)+1)%3]; build(); render(); }
   else if(mode==='m4'&&k==='c'){ cmp=!cmp; build(); render(); }
 });
