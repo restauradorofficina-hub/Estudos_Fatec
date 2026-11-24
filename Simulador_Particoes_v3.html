@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Simulador de Partições</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -171,10 +171,19 @@ td.n{font-family:var(--mono)}
 .qrow .tie{grid-column:3;position:relative;margin-right:calc(-28px - 3.2em - 4px);border-top:3px dashed var(--roxo);height:0;align-self:center}
 .qrow .tie::after{content:'';position:absolute;right:-2px;top:-8px;border:6px solid transparent;border-left:9px solid var(--roxo)}
 .qrow .tie i{position:absolute;left:0;top:4px;font-style:normal;font-size:.6em;font-weight:700;color:var(--roxo);white-space:nowrap}
-.box.kw{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
-.box.kw h3{flex-basis:100%}
-.kwc{border:1.5px solid var(--roxo);color:var(--roxo);background:#fff;padding:.05em .45em;font-size:.85em;font-weight:600}
-.kwc.on{background:var(--hl);border-color:var(--roxo);font-weight:800}
+.box.kw{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;border:3px solid var(--roxo);padding:10px 12px}
+.box.kw h3{flex-basis:100%;font-size:1.05em;color:var(--roxo);margin-bottom:4px}
+.kwc{border:1px solid var(--roxo);color:var(--roxo);background:#fff;padding:.12em .5em;font-size:1.12em;font-weight:700}
+.kwc.on{background:var(--hl);border-color:var(--hl);font-weight:800}
+.col.side.pg .kwc,.col.side.ux .kwc{font-size:.95em}
+.box.kw.focus{display:block;background:var(--hl);border:4px solid var(--roxo);padding:14px 16px;color:var(--roxo)}
+.box.kw.focus h3{font-size:1.9em;letter-spacing:.04em;margin:0 0 6px}
+.box.kw.focus .fdef{font-size:1.12em;font-weight:600;margin:0 0 10px;line-height:1.3;color:#111}
+.box.kw.focus .fonus{font-size:1em;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.box.kw.focus ul{margin:0;padding-left:1.2em;font-size:1.12em;line-height:1.32;color:#111}
+.box.kw.focus li{margin:0 0 6px}
+.box.kw.focus .fsrc{margin:8px 0 0;font-size:.85em;color:var(--roxo);font-weight:600}
+.msg.alert{background:var(--hl);border-color:var(--roxo);font-weight:700}
 .ucard .un small{font-family:var(--mono);font-size:.7em;font-weight:600;color:var(--ink2);margin-left:.3em}
 #anim{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
 .ctrls select{font:inherit;font-size:.85em;border:2px solid var(--ink);background:#fff;padding:.25em}
@@ -194,19 +203,19 @@ td.n{font-family:var(--mono)}
   <header>
     <h1>Simulador de Partições<small>Cap. 9 · Gerência de Memória</small></h1>
     <nav class="modes" id="modes" aria-label="Modos">
-      <button id="m1" data-m="m1" title="Partição fixa absoluta (tecla 1)">Fixa absoluta</button>
-      <button id="m2" data-m="m2" title="Partição fixa relocável (tecla 2)">Fixa relocável</button>
-      <button id="m3" data-m="m3" title="Alocação dinâmica (tecla 3)">Dinâmica</button>
-      <button id="m4" data-m="m4" title="First, Best e Worst-fit (tecla 4)">Estratégias</button>
-      <button id="m5" data-m="m5" title="Swapping (tecla 5)">Swapping</button>
-      <button id="m8" data-m="m8" title="Estudo de caso: Unix, multiprogramação (tecla U)">Unix</button>
-      <button id="m7" data-m="m7" title="Memória virtual: referência ao tema de outro grupo (tecla V)">Memória Virtual</button>
+      <button id="m1" data-m="m1" title="Partição fixa absoluta">Fixa absoluta</button>
+      <button id="m2" data-m="m2" title="Partição fixa relocável">Fixa relocável</button>
+      <button id="m3" data-m="m3" title="Alocação dinâmica">Dinâmica</button>
+      <button id="m4" data-m="m4" title="First, Best e Worst-fit">Estratégias</button>
+      <button id="m5" data-m="m5" title="Swapping">Swapping</button>
+      <button id="m8" data-m="m8" title="Estudo de caso: as primeiras versões do Unix, com swapping">Estudo de Caso</button>
+      <button id="m7" data-m="m7" title="Memória virtual: referência ao tema de outro grupo">Memória Virtual</button>
     </nav>
     <div class="sub" id="strat" hidden>
       <button id="s-first" data-s="first" title="A primeira área que cabe">First-fit</button>
       <button id="s-best" data-s="best" title="A menor área que cabe">Best-fit</button>
       <button id="s-worst" data-s="worst" title="A maior área">Worst-fit</button>
-      <button id="s-cmp" data-s="cmp" title="As três lado a lado (tecla C)">Comparar</button>
+      <button id="s-cmp" data-s="cmp" title="As três lado a lado">Comparar</button>
     </div>
   </header>
 
@@ -219,9 +228,9 @@ td.n{font-family:var(--mono)}
       <div class="ctrls">
         <button id="bBack" title="Voltar (seta esquerda)" aria-label="Voltar"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true"><path d="M15 5 7 12l8 7z" fill="currentColor"/><rect x="4" y="5" width="2.6" height="14" fill="currentColor"/></svg></button>
         <button id="bNext" class="pri" title="Próximo (seta direita)" aria-label="Próximo"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true"><path d="M9 5l8 7-8 7z" fill="currentColor"/><rect x="17.4" y="5" width="2.6" height="14" fill="currentColor"/></svg></button>
-        <button id="bPlay" title="Reproduzir / pausar (espaço)" aria-label="Reproduzir" aria-pressed="false"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button>
-        <button id="bReset" title="Recomeçar (R)" aria-label="Recomeçar"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.6 4.7" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M3 4v7h7z" fill="currentColor"/></svg></button>
-        <button id="bFull" title="Tela cheia (F)" aria-label="Tela cheia" aria-pressed="false"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></button>
+        <button id="bPlay" title="Reproduzir / pausar" aria-label="Reproduzir" aria-pressed="false"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button>
+        <button id="bReset" title="Recomeçar" aria-label="Recomeçar"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.6 4.7" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M3 4v7h7z" fill="currentColor"/></svg></button>
+        <button id="bFull" title="Tela cheia" aria-label="Tela cheia" aria-pressed="false"><svg viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></button>
         <input type="checkbox" id="anim" checked aria-hidden="true" tabindex="-1">
       </div>
     </div>
@@ -234,7 +243,8 @@ const PROG = {
   A:{L:'A',c:'--A'}, B:{L:'B',c:'--B'}, C:{L:'C',c:'--C'}, D:{L:'D',c:'--D'}, E:{L:'E',c:'--E'}, F:{L:'F',c:'--F'},
   SI:{L:'Space Invaders',c:'--A',real:'fliperama, 1978'}, PM:{L:'Pac-Man',c:'--E',dark:true,real:'fliperama, 1980'},
   AT:{L:'Pitfall!',c:'--C',real:'Atari 2600, 1982'}, MB:{L:'Super Mario Bros.',c:'--D',real:'NES, 1985'},
-  TP:{L:'Turbo Pascal 1.0',c:'--B',real:'1983'}
+  TP:{L:'Turbo Pascal 1.0',c:'--B',real:'1983'},
+  grep:{L:'grep',c:'--A'}, sort:{L:'sort',c:'--C'}, cat:{L:'cat',c:'--B'}, ls:{L:'ls',c:'--D'}, wc:{L:'wc',c:'--F'}
 };
 const sizeOf = {};
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -269,93 +279,100 @@ function scenM1(){
   const S=[]; const parts=[{z:2,p:null},{z:5,p:null},{z:8,p:null}];
   let q=[['A','C'],['B','E'],['D']]; Object.assign(sizeOf,{A:2,B:4,C:1,D:6,E:3});
   const push=(msg,extra={})=>S.push({kind:'part',parts:clone(parts),queues:clone(q),msg,...extra});
-  push('Partição fixa absoluta: o código de cada programa tem endereços fixos, então ele só roda na partição para a qual foi compilado. Cada partição tem a sua fila.');
-  parts[0].p='A'; q[0]=['C']; push('A (2 KB) entra na partição 1, a única onde pode rodar.',{moved:'A'});
+  push('Partição fixa absoluta: a memória é dividida em partes de tamanho fixo, as partições. Cada programa foi preparado (compilado) para uma partição certa e só pode rodar nela. Por isso cada partição tem a sua própria fila.');
+  parts[0].p='A'; q[0]=['C']; push('A (2 KB) entra na partição 1, a única onde ele pode rodar.',{moved:'A'});
   parts[1].p='B'; q[1]=['E']; push('B (4 KB) entra na partição 2.',{moved:'B'});
   parts[2].p='D'; q[2]=[]; push('D (6 KB) entra na partição 3.',{moved:'D'});
-  parts[2].p=null; push('D foi FECHADO. A partição 3 (8 KB) ficou livre.',{closed:['D']});
-  push('C (1 KB) e E (3 KB) cabem com folga nos 8 KB livres da partição 3, mas foram compilados para as partições 1 e 2. Continuam esperando.',{wait:['C','E'],hl:[2]});
-  parts[0].p=null; push('A foi FECHADO e liberou a partição 1.',{closed:['A']});
-  parts[0].p='C'; q[0]=[]; push('C finalmente entra na partição 1, a dele.',{moved:'C'});
-  parts[1].p=null; parts[1].p='E'; q[1]=[]; push('B foi FECHADO; só então E entra na partição 2. A partição 3 ficou ociosa o tempo todo em que C e E esperavam.',{moved:'E',closed:['B']});
-  push('Além disso, C ocupa 1 de 2 KB e E ocupa 3 de 5 KB: as sobras dentro das partições (hachurado) são a fragmentação interna. Exemplo real: OS/MFT da IBM.');
+  parts[2].p=null; push('D terminou (FECHADO) e saiu da memória. A partição 3 (8 KB) ficou livre.',{closed:['D']});
+  push('C (1 KB) e E (3 KB) caberiam com folga nos 8 KB livres da partição 3, mas foram preparados para as partições 1 e 2. Eles continuam esperando, e a partição 3 fica vazia.',{wait:['C','E'],hl:[2]});
+  parts[0].p=null; push('A terminou (FECHADO) e liberou a partição 1.',{closed:['A']});
+  parts[0].p='C'; q[0]=[]; push('Só agora C entra na partição 1, a dele.',{moved:'C'});
+  parts[1].p=null; parts[1].p='E'; q[1]=[]; push('B terminou (FECHADO), e só então E entra na partição 2. Enquanto C e E esperavam, a partição 3 ficou sem uso: uma partição ociosa.',{moved:'E',closed:['B']});
+  push('Outro problema: C usa só 1 dos 2 KB da partição dele, e E usa 3 dos 5 KB. A sobra dentro de uma partição ocupada (a parte listrada) ninguém mais pode usar. Isso é a fragmentação interna. Um sistema real que funcionava assim: o OS/MFT, da IBM.');
   return S;
 }
 function scenM2(){
   const S=[]; const parts=[{z:2,p:null},{z:5,p:null},{z:8,p:null}];
   let q=['C','A','E','B','D']; Object.assign(sizeOf,{A:2,B:4,C:1,D:6,E:3});
   const push=(msg,extra={})=>S.push({kind:'part',parts:clone(parts),queue:clone(q),msg,table:true,...extra});
-  push('Partição fixa relocável: o código é relocável, então o programa pode ir para qualquer partição livre onde caiba. Há uma fila só, e cada partição recebe um programa por vez.');
-  parts[0].p='C'; q.shift(); push('C (1 KB) vai para a primeira partição livre onde cabe: a partição 1 (2 KB). O SO marca a partição como ocupada na tabela.',{moved:'C',hl:[0]});
-  parts[1].p='A'; q.shift(); push('A (2 KB) vai para a partição 2, porque a 1 está ocupada. Com código absoluto, A só poderia usar a partição 1.',{moved:'A',hl:[1]});
-  parts[2].p='E'; q.shift(); push('E (3 KB) vai para a partição 3. Com código absoluto isso seria impossível: o loader recalcula os endereços de E para o novo início.',{moved:'E',hl:[2]});
-  push('B (4 KB) é o próximo, mas as três partições estão ocupadas, uma por programa. B espera, mesmo cabendo nos 5 KB que sobram na partição 3: aquela partição já é de E.',{wait:['B']});
-  push('D (6 KB) também espera. Somando as sobras há 1 + 3 + 5 = 9 KB livres, mas presos dentro das partições ocupadas: fragmentação interna (Figura 3 do relatório).',{wait:['B','D']});
+  push('Partição fixa relocável: agora o programa pode ir para qualquer partição livre onde caiba, porque os endereços dele são ajustados na hora de carregar. Há uma fila só, e cada partição recebe um programa por vez.');
+  parts[0].p='C'; q.shift(); push('C (1 KB) vai para a primeira partição livre onde cabe: a partição 1 (2 KB). O sistema operacional anota na tabela de partições que ela está ocupada.',{moved:'C',hl:[0]});
+  parts[1].p='A'; q.shift(); push('A (2 KB) vai para a partição 2, porque a 1 já está ocupada. Na partição fixa absoluta, A só poderia usar a partição 1.',{moved:'A',hl:[1]});
+  parts[2].p='E'; q.shift(); push('E (3 KB) vai para a partição 3. Quem torna isso possível é o loader (o carregador de programas): ele ajusta os endereços de E para o início dessa partição.',{moved:'E',hl:[2]});
+  push('B (4 KB) é o próximo, mas as três partições estão ocupadas. B espera, mesmo cabendo nos 5 KB que sobram na partição 3: aquela partição já é do E, e cada partição recebe um programa só.',{wait:['B']});
+  push('D (6 KB) também espera. Somando as sobras, há 1 + 3 + 5 = 9 KB livres, mas presos dentro de partições ocupadas: fragmentação interna.',{wait:['B','D']});
   return S;
 }
 function scenM3(){
-  const S=[]; const T=20; Object.assign(sizeOf,{A:4,B:2,C:5,E:6,D:6});
+  const S=[]; const T=20; Object.assign(sizeOf,{A:4,B:2,C:5,E:6,D:6,F:10});
   let mem=[{s:0,z:T,p:null}], q=['A','B','C','E'];
   const push=(msg,extra={})=>S.push({kind:'dyn',total:T,mem:clone(mem),queue:clone(q),msg,...extra});
-  push('Alocação dinâmica: não existem partições fixas. Cada programa ocupa só o que precisa, então não há fragmentação interna.');
+  push('Alocação dinâmica: a memória não é dividida antes. Cada programa recebe exatamente o espaço de que precisa, então não sobra espaço dentro dele (não há fragmentação interna).');
   for(const p of ['A','B','C','E']){ const r=choose(mem,sizeOf[p],'first'); const before=clone(mem); mem=place(mem,r.idx,p,sizeOf[p]); q.shift();
     push(`${p} (${sizeOf[p]} KB) ocupa exatamente ${sizeOf[p]} KB, a partir do endereço ${before[r.idx].s} KB.`,{moved:p,scan:r.scan,chosen:before[r.idx].s,before}); }
-  mem=release(mem,'A').mem; push('A foi FECHADO: ficou uma área livre de 4 KB no início.',{closed:['A']});
-  mem=release(mem,'C').mem; push('C foi FECHADO: mais uma área livre, de 5 KB, entre B e E.',{closed:['C']});
-  q=['D']; const r=choose(mem,6,'first'); push('D (6 KB) chega. Há 4 + 5 + 3 = 12 KB livres, mas nenhum pedaço tem 6 KB. Isso é fragmentação externa.',{scan:r.scan,nofit:true,before:clone(mem),wait:['D']});
-  mem=compact(mem,T); push('Solução 1, compactação: o SO move B e E para o início (relocação). Os 12 KB livres viram um bloco só.',{wait:['D']});
-  const r2=choose(mem,6,'first'); const b2=clone(mem); mem=place(mem,r2.idx,'D',6); q=[]; push('Agora D cabe: entra no bloco de 12 KB e sobram 6 KB.',{moved:'D',scan:r2.scan,chosen:b2[r2.idx].s,before:b2});
-  const rr=release(mem,'D'); mem=rr.mem; push('Solução 2, junção de áreas livres: D foi FECHADO, a área dele encosta na área livre vizinha e as duas viram uma só, de 12 KB, sem mover nenhum programa.',{closed:['D']});
+  mem=release(mem,'A').mem; push('A terminou (FECHADO): ficou uma área livre de 4 KB no início da memória.',{closed:['A']});
+  mem=release(mem,'C').mem; push('C terminou (FECHADO): surgiu outra área livre, de 5 KB, entre B e E.',{closed:['C']});
+  q=['D']; let r=choose(mem,6,'first'); push('D (6 KB) chega. Somando tudo, há 4 + 5 + 3 = 12 KB livres, mas em pedaços separados, e nenhum pedaço tem 6 KB. Isso é a fragmentação externa: D precisa esperar na fila.',{scan:r.scan,nofit:true,before:clone(mem),wait:['D']});
+  mem=release(mem,'E').mem; push('Na alocação dinâmica ninguém muda de lugar: o D apenas espera. Quando E termina (FECHADO), a área dele se junta às áreas livres vizinhas (junção de áreas livres): 5 + 6 + 3 = 14 KB seguidos.',{closed:['E'],wait:['D']});
+  r=choose(mem,6,'first'); let b=clone(mem); mem=place(mem,r.idx,'D',6); q=[];
+  push('D entra na área que o E liberou, a partir de 6 KB. Nenhum programa saiu do lugar: esta é a alocação particionada dinâmica.',{moved:'D',scan:r.scan,chosen:b[r.idx].s,before:b});
+  q=['F']; r=choose(mem,10,'first'); push('F (10 KB) chega. Há 4 + 8 = 12 KB livres, mas de novo nenhum pedaço tem 10 KB. É fragmentação externa outra vez, e agora a espera pode ser longa.',{scan:r.scan,nofit:true,before:clone(mem),wait:['F']});
+  mem=compact(mem,T); push('COMPACTAÇÃO: quando esperar não resolve, o sistema operacional move B e D para o início da memória (isso exige relocação dinâmica). Os 12 KB livres viram um bloco só, mas o sistema fica parado enquanto copia.',{wait:['F'],focus:{t:'Compactação',
+    d:'O sistema move todos os programas para o começo da memória e junta as áreas livres num bloco só. Também é chamada de alocação particionada dinâmica com relocação.',
+    items:['O processador fica ocupado copiando a memória, e os programas param enquanto isso','Cada programa movido muda de endereço: é preciso relocação dinâmica (registrador de relocação)','O algoritmo é complexo e gasta processador e disco: pode não compensar','Para ter uma ideia: compactar 16 GB pode levar cerca de 16 segundos'],
+    src:''}});
+  r=choose(mem,10,'first'); b=clone(mem); mem=place(mem,r.idx,'F',10); q=[];
+  push('Agora F cabe: entra no bloco de 12 KB e sobram 2 KB. Resumo: a alocação dinâmica espera e junta áreas vizinhas; a compactação move os programas, mas custa caro.',{moved:'F',scan:r.scan,chosen:b[r.idx].s,before:b});
   return S;
 }
 function scenM4(s){
   const S=[]; const T=50; Object.assign(sizeOf,{A:5,B:3,C:6,D:6,E:4});
   let mem=[{s:0,z:5,p:'A'},{s:5,z:3,p:'B'},{s:8,z:10,p:null},{s:18,z:6,p:'C'},{s:24,z:26,p:null}], q=['D','E'];
-  const N={first:'First-fit',best:'Best-fit',worst:'Worst-fit'}, RULE={first:'pega a primeira área livre onde o programa cabe',best:'pega a menor área livre onde o programa cabe',worst:'pega a maior área livre'};
+  const N={first:'First-fit',best:'Best-fit',worst:'Worst-fit'}, RULE={first:'escolhe a primeira área livre onde o programa cabe',best:'escolhe a menor área livre onde o programa cabe',worst:'escolhe a maior área livre'};
   const push=(msg,extra={})=>S.push({kind:'dyn',total:T,mem:clone(mem),queue:clone(q),msg,...extra});
-  const prev=(p,z)=>{ const r=choose(mem,z,s), c=mem[r.idx]; return {pv:{p,start:c.s}, txt:`${N[s]} ${RULE[s]}: ${p} (${z} KB) vai para o bloco de ${c.z} KB, em ${c.s} KB (contorno tracejado).`}; };
+  const prev=(p,z)=>{ const r=choose(mem,z,s), c=mem[r.idx]; return {pv:{p,start:c.s}, txt:`${N[s]} ${RULE[s]}: ${p} (${z} KB) vai para a área livre de ${c.z} KB, que começa em ${c.s} KB (contorno tracejado).`}; };
   const same=(z,m)=>{ const a=choose(m,z,'first').idx, b=choose(m,z,'best').idx; return a===b; };
   let pr=prev('D',6);
-  push(`Exercício 12 (seção 9.7). ${pr.txt}`,{preview:pr.pv});
+  push(`D (6 KB) e E (4 KB) esperam na fila. Onde colocar cada um? Depende da estratégia de alocação. ${pr.txt}`,{preview:pr.pv});
   const why=(p,z,m,idx,sc)=>{const c=m[idx]; const fits=sc.filter(a=>m.find(b=>b.s===a).z>=z).length;
     let t;
-    if(s==='first') t=`${N[s]} escolheu o bloco de ${c.z} KB (em ${c.s}) porque é o primeiro onde ${p} cabe. Sobram ${c.z-z} KB.`;
-    else if(s==='best') t=`${N[s]} comparou ${fits} blocos onde ${p} cabe e escolheu o de ${c.z} KB (em ${c.s}) porque é o menor. Sobram ${c.z-z} KB.`;
-    else t=`${N[s]} comparou ${fits} blocos onde ${p} cabe e escolheu o de ${c.z} KB (em ${c.s}) porque é o maior. Sobram ${c.z-z} KB.`;
-    if(s!=='worst' && same(z,m)) t+=' Aqui First-fit e Best-fit coincidem; a diferença aparece em E.';
+    if(s==='first') t=`${N[s]} escolheu a área livre de ${c.z} KB (em ${c.s}) porque é a primeira onde ${p} cabe. Sobram ${c.z-z} KB.`;
+    else if(s==='best') t=`${N[s]} comparou as ${fits} áreas livres onde ${p} cabe e escolheu a de ${c.z} KB (em ${c.s}) porque é a menor. Sobram ${c.z-z} KB.`;
+    else t=`${N[s]} comparou as ${fits} áreas livres onde ${p} cabe e escolheu a de ${c.z} KB (em ${c.s}) porque é a maior. Sobram ${c.z-z} KB.`;
+    if(s!=='worst' && same(z,m)) t+=' Aqui First-fit e Best-fit escolhem a mesma área; a diferença aparece com o E.';
     return t;};
   let r=choose(mem,6,s), b=clone(mem); mem=place(mem,r.idx,'D',6); q.shift(); push(why('D',6,b,r.idx,r.scan),{moved:'D',scan:r.scan,chosen:b[r.idx].s,before:b});
   const rl=release(mem,'A'); mem=rl.mem; pr=prev('E',4);
-  push(`A foi FECHADO e liberou 5 KB no início. ${pr.txt}`,{preview:pr.pv,closed:['A']});
+  push(`A terminou (FECHADO) e liberou 5 KB no início. ${pr.txt}`,{preview:pr.pv,closed:['A']});
   r=choose(mem,4,s); b=clone(mem); mem=place(mem,r.idx,'E',4); q.shift(); push(why('E',4,b,r.idx,r.scan),{moved:'E',scan:r.scan,chosen:b[r.idx].s,before:b});
   return S;
 }
 function scenM5(){
   const S=[]; const T=16; Object.assign(sizeOf,{A:6,B:4,C:6,D:4});
-  let mem=[{s:0,z:6,p:'A',st:'rodando'},{s:6,z:4,p:'B',st:'esperando E/S'},{s:10,z:6,p:'C',st:'rodando'}], q=['D'], disk=[], reg=null;
+  let mem=[{s:0,z:6,p:'A',st:'execução'},{s:6,z:4,p:'B',st:'espera (E/S)'},{s:10,z:6,p:'C',st:'execução'}], q=['D'], disk=[], reg=null;
   const push=(msg,extra={})=>S.push({kind:'dyn',total:T,mem:clone(mem),queue:clone(q),disk:clone(disk),reg:reg&&{...reg},msg,swap:true,...extra});
-  push('Memória cheia: 16 de 16 KB ocupados. Chega D (4 KB) e não há espaço.',{wait:['D']});
-  push('O SO escolhe um processo que está parado: B, bloqueado esperando uma operação de E/S.',{wait:['D'],hlp:'B'});
-  mem=mem.map(b=>b.p==='B'?{s:b.s,z:b.z,p:null}:b); disk=['B']; push('Swap out: B é copiado para o disco e a área dele (6 a 10 KB) fica livre.',{moved:'B',wait:['D']});
-  mem=mem.map(b=>b.s===6?{s:6,z:4,p:'D',st:'rodando'}:b); q=[]; push('D entra no lugar de B.',{moved:'D'});
-  mem=release(mem,'A').mem; push('A foi FECHADO: o início da memória (0 a 6 KB) ficou livre.',{closed:['A']});
+  push('A memória está cheia: 16 de 16 KB ocupados. Chega D (4 KB) e não há espaço para ele.',{wait:['D']});
+  push('O sistema operacional escolhe um processo com pouca chance de rodar agora: B, que está em espera, aguardando terminar uma leitura ou gravação (E/S).',{wait:['D'],hlp:'B'});
+  mem=mem.map(b=>b.p==='B'?{s:b.s,z:b.z,p:null}:b); disk=['B']; push('Swap out: B inteiro é copiado para o disco, e a área dele (6 a 10 KB) fica livre.',{moved:'B',wait:['D']});
+  mem=mem.map(b=>b.s===6?{s:6,z:4,p:'D',st:'execução'}:b); q=[]; push('D entra no lugar de B.',{moved:'D'});
+  mem=release(mem,'A').mem; push('A terminou (FECHADO): o início da memória (0 a 6 KB) ficou livre.',{closed:['A']});
   disk=[]; mem=place(mem,0,'B',4); mem=mem.map(b=>b.p==='B'?{...b,st:'pronto'}:b); reg={p:'B',old:6,neu:0};
-  push('Swap in: B volta do disco, mas para OUTRO endereço (0 KB), porque o lugar antigo agora é de D.',{moved:'B'});
-  push('Isso só funciona com relocação dinâmica: o registrador de relocação guarda o novo início de B, e o hardware soma esse valor a cada endereço que B acessa.');
+  push('Swap in: B volta do disco, mas para OUTRO endereço (0 KB), porque o lugar antigo agora é do D.',{moved:'B'});
+  push('Isso só funciona com relocação dinâmica: o registrador de relocação guarda onde B começa agora, e o hardware soma esse valor a cada endereço que B usa. Assim B funciona em qualquer lugar da memória.');
   return S;
 }
 function scenM7(){
   const S=[]; Object.assign(sizeOf,{B:4,C:8,E:8,D:12,F:8});
   S.push({kind:'dyn',total:32,mem:[{s:0,z:4,p:'B'},{s:4,z:4,p:null},{s:8,z:8,p:'C'},{s:16,z:4,p:null},{s:20,z:8,p:'E'},{s:28,z:4,p:null}],queue:['D'],wait:['D'],
-    msg:'O problema do cap. 9: há 12 KB livres, mas em três pedaços de 4 KB. D precisa de 12 KB contíguos e não entra (fragmentação externa). A memória virtual resolve isso (referência: tema de outro grupo, cap. 10).'});
+    msg:'O limite do que vimos: há 12 KB livres, mas em três pedaços de 4 KB. D precisa de 12 KB seguidos e não entra (fragmentação externa). A memória virtual resolve isso (tema de outro grupo, cap. 10).'});
   let fr=['B0',null,'C0','C1',null,'E0','E1',null], disk=[], q=['D'];
   const push=(msg,extra={})=>S.push({kind:'page',total:32,frames:fr.slice(),queue:q.slice(),disk:disk.slice(),swap:true,msg,...extra});
-  push('MEMÓRIA VIRTUAL por paginação, no exemplo do Windows 2000: a memória é dividida em frames de 4 KB (tamanho da página no Pentium) e cada programa em páginas do mesmo tamanho (Machado; Maia, 2007, p. 277).',{wait:['D']});
+  push('MEMÓRIA VIRTUAL por paginação, no exemplo do Windows 2000: a memória é dividida em frames de 4 KB, e cada programa é dividido em páginas do mesmo tamanho.',{wait:['D']});
   q=['D0','D1','D2']; push('Atenção: D continua sendo UM programa só, de 12 KB. A paginação apenas marca onde cortar: a cada 4 KB, o tamanho de um frame.',{whole:'D',hlp:['D']});
   push('D é cortado em 3 páginas de 4 KB: pág 0, pág 1 e pág 2. As três são pedaços do MESMO programa, por isso têm a mesma cor e a mesma letra.',{hlp:['D']});
   fr[1]='D0'; fr[4]='D1'; fr[7]='D2'; q=[]; push('As 3 páginas do programa D vão para os frames 1, 4 e 7, mesmo separados. D está inteiro na memória, só que espalhado: a tabela de páginas guarda onde está cada pedaço. A fragmentação externa desapareceu.',{hlf:[1,4,7],hlp:['D']});
   q=['F0','F1']; sizeOf.F=8; push('Chega outro programa, F (8 KB), já cortado em 2 páginas. Não há nenhum frame livre.',{wait:['F0','F1']});
-  fr[5]=null; fr[6]=null; disk=['E0','E1']; push('E está parado: as páginas dele saem do working set e vão para o arquivo de paginação (p. 280). Isto NÃO é swapping: E continua na memória virtual e cada página volta sozinha, quando for usada.',{wait:['F0','F1'],hlp:['E']});
+  fr[5]=null; fr[6]=null; disk=['E0','E1']; push('E está em espera: as páginas dele saem da memória e vão para o arquivo de paginação, no disco. Isto NÃO é swapping: E continua na memória virtual e cada página volta sozinha, quando for usada.',{wait:['F0','F1'],hlp:['E']});
   fr[5]='F0'; fr[6]='F1'; q=[]; push('F ocupa os frames que E liberou.',{hlf:[5,6],hlp:['F']});
   fr[0]=null; push('B foi FECHADO: o frame 0 ficou livre.',{closed:['B0']});
   fr[0]='E0'; disk=['E1']; push('E volta a executar e precisa da página 0: ela é lida do arquivo de paginação para o frame 0, um lugar diferente do original. Só a página usada volta, não o processo inteiro.',{hlf:[0],hlp:['E']});
@@ -363,106 +380,35 @@ function scenM7(){
   return S;
 }
 
-/* ---------------- modo Unix (Machado; Maia, 2007, seção 15.6) ---------------- */
-const UL = {
-  V0:{t:'grep',s:'texto · pág 0',c:'--roxo',o:'101 + 102',sh:1}, V1:{t:'grep',s:'texto · pág 1',c:'--roxo',o:'101 + 102',sh:1},
-  AD:{t:'grep 101',s:'dados',c:'--A',o:'101'}, AP:{t:'grep 101',s:'pilha',c:'--A',o:'101'},
-  BD:{t:'grep 102',s:'dados',c:'--B',o:'102'}, BP:{t:'grep 102',s:'pilha',c:'--B',o:'102'},
-  KT:{t:'sort',s:'texto',c:'--C',o:'103'}, CD:{t:'sort 103',s:'dados 0',c:'--C',o:'103'}, CD1:{t:'sort 103',s:'dados 1',c:'--C',o:'103'}, CP:{t:'sort 103',s:'pilha',c:'--C',o:'103'},
-  TT:{t:'cat',s:'texto',c:'--F',o:'104'}, TD:{t:'cat 104',s:'dados',c:'--F',o:'104'}
-};
-const USTATE={fora:'não iniciado',ativo:'executando',parado:'bloqueado (E/S)',esperando:'esperando memória',disco:'no disco (swap)',fim:'terminou'};
+/* ---------------- estudo de caso: as primeiras versões do Unix ----------------
+   Só conceitos do cap. 9: alocação dinâmica, fragmentação externa, estratégias, swapping e relocação dinâmica. */
 function scenM8(){
-  const S=[]; let fr=[null,null,null,null,null,null,null,null], disk=[];
-  const U=(a,b,c,d)=>[
-    {n:'grep',pid:101,cmd:'grep main programa.c',c:'--A',s:a},
-    {n:'grep',pid:102,cmd:'grep for exemplo.c',c:'--B',s:b},
-    {n:'sort',pid:103,cmd:'sort nomes.txt',c:'--C',s:c},
-    {n:'cat',pid:104,cmd:'cat relatorio.txt',c:'--F',s:d}];
-  const F=id=>({id}), L=id=>({id,lg:1});
-  const push=(msg,users,extra={})=>S.push({kind:'unix',total:32,frames:clone(fr),disk:disk.slice(),users,swap:true,msg,...extra});
-  push('Unix é multiprogramado: vários programas ficam na memória ao mesmo tempo e revezam a CPU. Aqui: grep, sort e cat. A gerência de memória é paginação com swapping (Machado; Maia, 2007, p. 294).',U('fora','fora','fora','fora'));
-  fr[0]=F('V0'); fr[1]=F('AD'); fr[2]=F('AP');
-  push('O grep (PID 101) começa. Paginação por demanda: só entram as páginas referenciadas (texto pág 0, dados e pilha). A pág 1 do código fica no arquivo executável até ser usada (p. 297).',U('ativo','fora','fora','fora'),{hlf:[0,1,2]});
-  fr[4]=F('BD'); fr[5]=F('BP');
-  push('Um segundo grep (PID 102) começa, em outro arquivo. O segmento de texto (o código) é protegido contra gravação e é compartilhado: os dois grep usam a mesma cópia. Só dados e pilha ocupam frames novos (p. 296).',U('ativo','ativo','fora','fora'),{hlf:[0,4,5],sh:1});
-  fr[3]=F('V1');
-  push('O grep 101 usa uma rotina que está na pág 1 do código: page fault. A página vem do executável para o frame 3 e serve aos dois. O grep 102 fica bloqueado, esperando leitura do disco (E/S).',U('ativo','parado','fora','fora'),{hlf:[3],sh:1});
-  push('O sort (PID 103) começa e precisa de 3 páginas, mas a lista de páginas livres tem só 2 frames, abaixo do mínimo. O daemon page (processo 2) é acordado para repor a lista (p. 297).',U('ativo','parado','esperando','fora'),{sh:1,lack:true});
-  push('Two-handed clock: o ponteiro 1 vai à frente desligando o bit de referência (R); o ponteiro 2 vem atrás conferindo. Quem continua com R = 0 não foi usado no intervalo: frames 3 e 4 são escolhidos (p. 297).',U('ativo','parado','esperando','fora'),{sh:1,rb:[1,1,1,0,0,0,null,null],hands:{p1:5,p2:4},sel:[3,4]});
-  fr[3]=L('V1'); fr[4]=null; disk=['BD'];
-  push('Pág 1 do grep (texto) vai direto para a lista livre: pode ser relida do executável. Os dados do grep 102 foram modificados: são gravados na área de swap antes. Política global: saíram páginas dos dois grep, não do sort.',U('ativo','parado','esperando','fora'),{sh:1});
-  fr[3]=F('V1');
-  push('Segunda chance: o grep 101 volta a usar a pág 1 do código. Ela ainda estava no frame 3, na lista livre, e é recuperada sem acessar o disco (p. 297).',U('ativo','parado','esperando','fora'),{sh:1,hlf:[3]});
-  fr[4]=F('KT'); fr[6]=F('CD'); fr[7]=F('CP');
-  push('O sort entra: texto, dados e pilha vão para os frames 4, 6 e 7, que não são vizinhos. Qualquer frame serve: não existe fragmentação externa.',U('ativo','parado','ativo','fora'),{sh:1,hlf:[4,6,7]});
-  push('Para ordenar, o sort precisa de mais memória (a área de dados é dinâmica) e a lista livre está vazia. A paginação não dá conta: entra o daemon swapper, que escolhe o processo inativo há mais tempo: o grep 102 (p. 298).',U('ativo','parado','esperando','fora'),{sh:1,sel:[5],lack:true});
-  fr[5]=null; disk=['BD','BP'];
-  push('O grep 102 vai inteiro para a área de swap: é o swapping do cap. 9, agora como último recurso. O código do grep continua na memória, porque o grep 101 ainda o usa.',U('ativo','disco','esperando','fora'),{sh:1,hlf:[0,3]});
-  fr[5]=F('CD1');
-  push('O frame liberado recebe a nova página de dados do sort.',U('ativo','disco','ativo','fora'),{sh:1,hlf:[5]});
-  fr[4]=null; fr[5]=null; fr[6]=null; fr[7]=null;
-  push('O sort terminou de ordenar: o processo é FECHADO e os quatro frames voltam para a lista livre.',U('ativo','disco','fim','fora'),{sh:1,closed:['KT','CD','CD1','CP']});
-  fr[6]=F('BD'); fr[7]=F('BP'); disk=[];
-  push('O swapper traz de volta quem está há mais tempo no disco: o grep 102, para outros frames. O código não precisa voltar: já está na memória, compartilhado com o grep 101.',U('ativo','ativo','fim','fora'),{sh:1,hlf:[6,7]});
-  fr[4]=F('TT'); fr[5]=F('TD');
-  push('O cat (PID 104) começa nos frames que sobraram. Agora três processos dividem a memória: multiprogramação.',U('ativo','ativo','fim','ativo'),{sh:1,hlf:[4,5]});
-  push('Resumo: no Unix vários programas dividem a memória em páginas. Mesmo programa, uma cópia só do código; a substituição de páginas é global (two-handed clock); e o swapping do cap. 9 fica como último recurso.',U('ativo','ativo','fim','ativo'),{sh:1});
+  const S=[]; const T=32; Object.assign(sizeOf,{grep:6,sort:8,cat:4,ls:5,wc:8});
+  let mem=[{s:0,z:T,p:null}], q=['grep','sort','cat'], disk=[], reg=null;
+  const push=(msg,extra={})=>S.push({kind:'dyn',total:T,os:'Unix',soLabel:'Kernel do Unix',mem:clone(mem),queue:clone(q),disk:clone(disk),reg:reg&&{...reg},swap:true,msg,...extra});
+  const load=(p,msg,stt)=>{ const r=choose(mem,sizeOf[p],'first'), b=clone(mem); mem=place(mem,r.idx,p,sizeOf[p]); if(stt) mem=mem.map(x=>x.p===p?{...x,st:stt}:x); q=q.filter(x=>x!==p);
+    push(msg,{moved:p,scan:r.scan,chosen:b[r.idx].s,before:b}); };
+  push('Estudo de caso: as primeiras versões do Unix. Elas ainda não tinham memória virtual: usavam basicamente swapping, e cada processo ocupava uma área seguida da memória, do tamanho dele. Os processos aqui são comandos comuns do Unix: grep, sort e cat.');
+  load('grep','grep (6 KB) entra a partir do endereço 0 KB e ocupa exatamente 6 KB: alocação dinâmica, sem partições fixas.');
+  load('sort','sort (8 KB) entra logo depois, a partir de 6 KB. Vários processos dividem a memória ao mesmo tempo: multiprogramação.');
+  load('cat','cat (4 KB) entra a partir de 14 KB. Ele precisa que o usuário digite um texto e, enquanto isso não acontece, fica no estado de espera.','espera');
+  mem=release(mem,'grep').mem; push('grep terminou (FECHADO): ficou uma área livre de 6 KB no início. Agora há duas áreas livres: 6 KB a partir de 0 e 14 KB a partir de 18.',{closed:['grep']});
+  q=['ls']; push('ls (5 KB) chega. Onde colocar? First-fit e best-fit escolhem a área livre de 6 KB, no início; worst-fit escolheria a maior, de 14 KB. Aqui o sistema usa first-fit.',{preview:{p:'ls',start:0}});
+  load('ls','ls entra em 0 KB. Sobra 1 KB entre ls e sort: um pedaço pequeno demais para quase qualquer programa.');
+  q=['wc']; push('wc (8 KB) chega e entra na fila. Onde ele vai caber? Há duas áreas livres: 1 KB entre ls e sort, e 14 KB a partir de 18 KB.');
+  load('wc','O first-fit examina as áreas livres na ordem: a de 1 KB não serve, a de 14 KB serve. wc entra em 18 KB e sobram 6 KB no fim.');
+  mem=mem.map(x=>x.p==='sort'?{...x,st:'precisa de 12 KB'}:x);
+  push('O sort precisa de mais memória: vai crescer de 8 para 12 KB, e o espaço tem que ser seguido. Há 1 + 6 = 7 KB livres, mas nenhum pedaço fica ao lado dele: fragmentação externa.',{hlp:'sort'});
+  push('Em vez de compactar a memória, o Unix chama o swapper, a parte do sistema que faz o swapping. Ele escolhe quem está parado há mais tempo: o cat, em espera desde o começo, aguardando o teclado.',{hlp:'cat'});
+  mem=mem.map(x=>x.p==='cat'?{s:x.s,z:x.z,p:null}:x); disk=['cat'];
+  push('Swap out: o cat inteiro é copiado para o disco. A área de 14 a 18 KB, logo depois do sort, fica livre.',{moved:'cat'});
+  { const k=mem.findIndex(x=>x.p==='sort'); const a=mem[k]; mem.splice(k,2,{s:a.s,z:12,p:'sort'}); }
+  push('O sort cresce para 12 KB, usando a área que o cat deixou. Nenhum outro processo foi movido.',{hlp:'sort'});
+  { const r=choose(mem,4,'first'), b=clone(mem); mem=place(mem,r.idx,'cat',4); disk=[]; reg={p:'cat',old:14,neu:b[r.idx].s};
+    push(`O usuário digitou: o cat precisa voltar. Swap in: ele volta inteiro, mas para OUTRO endereço (${b[r.idx].s} KB), porque o lugar antigo agora é do sort.`,{moved:'cat',scan:r.scan,chosen:b[r.idx].s,before:b}); }
+  push('Isso exige relocação dinâmica: o registrador de relocação do cat passa de 14 para 26 KB, e o hardware soma esse valor a cada endereço que o cat usa.');
+  push('Resumo: o Unix antigo usou o que vimos neste capítulo: alocação dinâmica, estratégias de alocação e swapping. Mas sobram pedaços de 1 e 2 KB que ninguém usa: a fragmentação externa. Esse problema leva à memória virtual (cap. 10), que as versões seguintes do Unix adotaram.');
   return S;
-}
-function memUnix(st){
-  const wrap=document.createElement('div'); wrap.className='memwrap parted';
-  const addr=document.createElement('div'); addr.className='addr';
-  const mem=document.createElement('div'); mem.className='mem';
-  wrap.append(addr,mem);
-  wrap._draw=()=>{
-    mem.innerHTML=''; addr.innerHTML=''; const H=mem.clientHeight||400, soH=Math.max(34,H*0.08);
-    const so=document.createElement('div'); so.className='blk so'; so.style.top='0'; so.style.height=soH+'px'; so.innerHTML='Kernel + core map <span style="font-weight:400;font-size:.8em">(não paginável)</span>'; mem.appendChild(so);
-    const n=st.frames.length, fh=(H-soH)/n;
-    st.frames.forEach((f,i)=>{ const y=soH+i*fh;
-      const d=document.createElement('div'); d.style.top=y+'px'; d.style.height=fh+'px'; d.dataset.start=i;
-      if(f && !f.lg){ const P=UL[f.id]; d.className='blk proc'; d.dataset.pid=f.id; d.style.background=`var(${P.c})`;
-        d.innerHTML=`<span class="L">${P.t}</span><span class="S">${P.s}</span>${P.sh&&st.sh?'<span class="tag">compartilhado</span>':''}`; }
-      else if(f && f.lg){ const P=UL[f.id]; d.className='blk linger'; d.dataset.pid=f.id;
-        d.innerHTML=`<span class="t">lista livre</span><span class="S">ainda guarda: ${P.t} ${P.s}</span>`; }
-      else { d.className='blk free'; d.innerHTML='<span class="t">frame livre</span>'; }
-      if(st.hlf&&st.hlf.includes(i)) d.classList.add('chosen');
-      if(st.sel&&st.sel.includes(i)) d.classList.add('chosen');
-      if(st.hands){ if(st.hands.p1===i) d.insertAdjacentHTML('beforeend','<span class="hand">ponteiro 1 · desliga R</span>');
-                    if(st.hands.p2===i) d.insertAdjacentHTML('beforeend','<span class="hand h2">ponteiro 2 · confere</span>'); }
-      mem.appendChild(d);
-      const nm=document.createElement('div'); nm.className='pname'; nm.style.top=(y+fh/2)+'px'; nm.style.transform='translateY(-50%)'; nm.style.position='absolute'; nm.style.left='calc(100% + 8px)';
-      const r=st.rb? st.rb[i] : undefined;
-      nm.innerHTML=`Frame ${i}<small>${r==null? (i*4)+'–'+(i*4+4)+' KB' : 'R = '+r}</small>`; mem.appendChild(nm);
-      const a=document.createElement('span'); a.style.top=y+'px'; a.textContent=i*4; addr.appendChild(a); });
-    const a=document.createElement('span'); a.style.top=(H-2)+'px'; a.textContent=(n*4)+' KB'; addr.appendChild(a);
-  };
-  return wrap;
-}
-function uCard(id){ const P=UL[id]; const d=document.createElement('div'); d.className='card proc'; d.dataset.pid=id; d.style.background=`var(${P.c})`;
-  d.innerHTML=`<span class="L">${P.t}</span><span class="S">${P.s}</span><span class="tag">no disco</span>`; return d; }
-function usersCol(st){
-  const col=document.createElement('section'); col.className='col';
-  col.innerHTML='<h2>Processos · multiprogramação</h2>';
-  const body=document.createElement('div'); body.className='colbody'; col.appendChild(body);
-  const u=document.createElement('div'); u.className='users'; body.appendChild(u);
-  st.users.forEach(x=>{ const c=document.createElement('div'); c.className='ucard st-'+x.s;
-    c.innerHTML=`<span class="sw" style="background:var(${x.c})"></span><span class="un">${x.n} <small>PID ${x.pid}</small></span><span class="up">$ ${x.cmd}</span><span class="us">${USTATE[x.s]}</span>`; u.appendChild(c); });
-  u.insertAdjacentHTML('beforeend','<p class="note" style="margin:.4em 0 0">Vários programas carregados ao mesmo tempo, revezando a CPU (multiprogramação).</p>');
-  body._draw=()=>{}; return col;
-}
-function unixSide(st,col){
-  const t=document.createElement('div'); t.className='box';
-  t.innerHTML='<h3>Core map · quem está em cada frame</h3><table class="cm"><thead><tr><th>Frame</th><th>Conteúdo</th><th>PID</th></tr></thead><tbody>'+
-    st.frames.map((f,i)=>{ if(!f) return `<tr><td class="n">${i}</td><td>livre</td><td>–</td></tr>`;
-      const P=UL[f.id]; if(f.lg) return `<tr class="lg"><td class="n">${i}</td><td>lista livre (${P.t} ${P.s.split(' · ')[0]})</td><td>–</td></tr>`;
-      const hl=(st.hlf&&st.hlf.includes(i))||(st.sel&&st.sel.includes(i));
-      return `<tr${hl?' style="background:#fff4cc;font-weight:700"':''}><td class="n">${i}</td><td>${P.t} ${P.s}</td><td>${P.sh&&!st.sh?'101':P.o}</td></tr>`; }).join('')+'</tbody></table>';
-  col.appendChild(t);
-  const d=document.createElement('div'); d.className='box disk';
-  d.innerHTML='<h3>Disco · área de swap</h3>';
-  const dc=document.createElement('div'); dc.className='diskcards'; (st.disk||[]).forEach(p=>dc.appendChild(uCard(p))); if(!(st.disk||[]).length) dc.innerHTML='<span class="empty">vazio</span>';
-  d.appendChild(dc); col.appendChild(d);
 }
 
 /* ---------------- estado ---------------- */
@@ -500,7 +446,7 @@ function memDyn(st,opts={}){
   const draw=(memList)=>{
     mem.innerHTML=''; addr.innerHTML='';
     const H=mem.clientHeight||400, soH=Math.max(28,H*0.07);
-    const so=document.createElement('div'); so.className='blk so'; so.style.top='0px'; so.style.height=soH+'px'; so.textContent='Sistema Operacional'; mem.appendChild(so);
+    const so=document.createElement('div'); so.className='blk so'; so.style.top='0px'; so.style.height=soH+'px'; so.textContent=st.soLabel||'Sistema Operacional'; mem.appendChild(so);
     const hs=heights(memList.map(b=>b.z),H-soH,26); let y=soH;
     memList.forEach((b,i)=>{
       const d=document.createElement('div'); d.className='blk'+(b.p?' proc'+(PROG[b.p].dark?' dark':''):' free'); d.dataset.start=b.s;
@@ -600,7 +546,7 @@ const KW={
   m3:['Alocação dinâmica','Fragmentação externa','Compactação','Relocação','Junção de áreas livres'],
   m4:['First-fit','Best-fit','Worst-fit','Área livre','Fragmentação externa'],
   m5:['Swapping','Swap out','Swap in','Relocação dinâmica','Registrador de relocação'],
-  m8:['Multiprogramação','Paginação por demanda','Texto compartilhado','Page fault','Daemon page','Two-handed clock','Política global','Swapper','Core map'],
+  m8:['Multiprogramação','Alocação dinâmica','Fragmentação externa','First-fit','Best-fit','Worst-fit','Swapper','Swap out','Swap in','Relocação dinâmica'],
   m7:['Memória virtual','Paginação','Página','Frame','Tabela de páginas','Working set','Arquivo de paginação']
 };
 const KWM={'Código absoluto':['absolut','compilad'],'Fila por partição':['sua fila','uma por partição'],'Partição ociosa':['ociosa'],'Código relocável':['relocáv'],'Loader':['loader'],'Fila única':['fila só'],
@@ -610,6 +556,9 @@ const KWM={'Código absoluto':['absolut','compilad'],'Fila por partição':['sua
   'Multiprogramação':['multiprogram','dividem a memória'],'Memória virtual':['memória virtual'],'Paginação':['paginação'],'Página':['página'],'Frame':['frame'],'Tabela de páginas':['tabela de páginas'],
   'Working set':['working set'],'Arquivo de paginação':['arquivo de paginação'],'Partição fixa':['partição fixa'],'Alocação dinâmica':['alocação dinâmica']};
 function kwBox(st){ const list=KW[mode]; if(!list) return null; const m=(st.msg||'').toLowerCase();
+  if(st.focus){ const f=document.createElement('div'); f.className='box kw focus';
+    f.innerHTML=`<h3>${st.focus.t}</h3><p class="fdef">${st.focus.d}</p><div class="fonus">Ônus para o sistema</div><ul>${st.focus.items.map(x=>`<li>${x}</li>`).join('')}</ul>${st.focus.src?`<p class="fsrc">${st.focus.src}</p>`:''}`;
+    return f; }
   const b=document.createElement('div'); b.className='box kw'; b.innerHTML='<h3>Palavras-chave</h3>'+
     list.map(k=>{ const keys=KWM[k]||[k.toLowerCase()]; const on=keys.some(x=>m.includes(x)); return `<span class="kwc${on?' on':''}">${k}</span>`; }).join('');
   return b; }
@@ -617,7 +566,6 @@ function sideCol(st){
   const col=document.createElement('section'); col.className='col side';
   const kb=kwBox(st); if(kb) col.appendChild(kb);
   if(mode==='m7'){ (kb||col).insertAdjacentHTML('beforeend','<div class="ref"><b>Referência:</b> tema de outro grupo do seminário (cap. 10)</div>'); if(st.kind==='page') col.classList.add('pg'); }
-  if(st.kind==='unix'){ unixSide(st,col); return col; }
   if(st.table){ const t=document.createElement('div'); t.className='box';
     t.innerHTML='<h3>Tabela de partições</h3><table><thead><tr><th>Partição</th><th>Tamanho</th><th>Programa</th><th>Livre?</th></tr></thead><tbody>'+
       st.parts.map((p,i)=>`<tr><td>${i+1}</td><td class="n">${p.z} KB</td><td><b>${p.p||'–'}</b></td><td><b>${p.p?'Não':'Sim'}</b></td></tr>`).join('')+'</tbody></table><p class="note" style="margin:.4em 0 0">Um programa por partição, de cada vez.</p>'; col.appendChild(t); }
@@ -628,7 +576,7 @@ function sideCol(st){
     d.innerHTML='<h3>'+(st.kind==='page'?'Disco · arquivo de paginação':'Disco (área de swap)')+'</h3><svg viewBox="0 0 64 56" aria-hidden="true"><ellipse cx="32" cy="10" rx="28" ry="8" fill="#ddd" stroke="#111" stroke-width="2"/><path d="M4 10v34c0 4.4 12.5 8 28 8s28-3.6 28-8V10" fill="#ddd" stroke="#111" stroke-width="2"/><path d="M4 27c0 4.4 12.5 8 28 8s28-3.6 28-8" fill="none" stroke="#111" stroke-width="2"/></svg>';
     const dc=document.createElement('div'); dc.className='diskcards'; (st.disk||[]).forEach(p=>dc.appendChild(progEl(p,'no disco'))); if(!(st.disk||[]).length) dc.innerHTML='<span class="empty">vazio</span>';
     d.appendChild(dc); col.appendChild(d); }
-  if(mode==='m5'){ const r=document.createElement('div'); r.className='box';
+  if(mode==='m5'||mode==='m8'){ const r=document.createElement('div'); r.className='box';
     r.innerHTML='<h3>Registrador de relocação</h3>'+(st.reg?`<div class="reg">${st.reg.p}: base <s>${st.reg.old} KB</s> → <b>${st.reg.neu} KB</b></div><p class="note">endereço físico = base + endereço lógico</p>`:'<p class="note">Aparece quando um processo volta do disco para outro lugar.</p>'); col.appendChild(r); }
 
   if(st.real){ col.insertAdjacentHTML('beforeend','<div class="disclaimer">Tamanhos aproximados · cenário didático: esses programas nunca dividiram memória num mesmo sistema.</div>'); }
@@ -638,8 +586,6 @@ function sideCol(st){
 
 function counters(st){
   const el=document.getElementById('counters'); let free,areas,maior,waste,wl;
-  if(st.kind==='unix'){ const lv=st.frames.filter(f=>!f||f.lg).length, vi=st.frames.filter(f=>f&&!f.lg&&(f.id==='V0')).length;
-    el.innerHTML=`<div class="${st.lack?'bad':''}">Lista de páginas livres <b>${lv} frame${lv===1?'':'s'}</b></div><div>Cópias do código do grep na memória <b>${vi}</b></div><div>Fragmentação externa <b>0 KB</b></div>`; return; }
   if(st.kind==='page'){ const fr=st.frames.filter(f=>!f).length; el.innerHTML=`<div>Frames livres <b>${fr} × 4 KB = ${fr*4} KB</b></div><div>Fragmentação externa <b>0 KB</b> (qualquer frame serve)</div>`; return; }
   if(st.kind==='part'){ const fp=st.parts.filter(p=>!p.p); free=fp.reduce((a,p)=>a+p.z,0); areas=fp.length; maior=fp.reduce((a,p)=>Math.max(a,p.z),0);
     waste=st.parts.filter(p=>p.p).reduce((a,p)=>a+(p.z-sizeOf[p.p]),0); free+=waste; wl='Desperdício (frag. interna)'; }
@@ -660,10 +606,10 @@ function flip(prev){
 function drawStage(st,prev,memOverride){
   const stage=document.getElementById('stage'); stage.className='stage'; stage.innerHTML='';
   const memCol=document.createElement('section'); memCol.className='col';
-  memCol.innerHTML=`<h2 class="mh${st.kind==='dyn'?'':' mhp'}">Memória principal${st.total?` · ${st.total} KB`:''}${st.kind==='page'?' <span class="vm">memória virtual · paginação, não swapping</span>':''}</h2>`;
+  memCol.innerHTML=`<h2 class="mh${st.kind==='dyn'?'':' mhp'}">Memória principal${st.total?` · ${st.total} KB`:''}${st.os?` · ${st.os}`:''}${st.kind==='page'?' <span class="vm">memória virtual · paginação, não swapping</span>':''}</h2>`;
   const mb=document.createElement('div'); mb.className='colbody'; memCol.appendChild(mb);
-  const mw= st.kind==='part'? memPart(st) : st.kind==='page'? memPage(st) : st.kind==='unix'? memUnix(st) : memDyn(st,{hlp:st.hlp}); mb.appendChild(mw);
-  const qc= st.kind==='unix'? usersCol(st) : queueCol(st,mw);
+  const mw= st.kind==='part'? memPart(st) : st.kind==='page'? memPage(st) : memDyn(st,{hlp:st.hlp}); mb.appendChild(mw);
+  const qc= queueCol(st,mw);
   stage.append(qc,memCol,sideCol(st));
   mw._draw(memOverride||st.mem); qc.querySelector('.colbody')._draw();
   flip(prev);
@@ -685,7 +631,7 @@ function drawCompare(){
 function render(dir=0){
   const st=cur(); document.getElementById('stepn').textContent=`${step+1}/${nSteps()}`;
   let msg=st.msg; if(mode==='m4'&&cmp){ msg = step===0? steps[0][0].msg : ['first','best','worst'].map((s,i)=>steps[i][step].msg.split(' Sobram')[0].replace(/ porque.*$/,'')).join('  ·  '); }
-  document.getElementById('msg').textContent=msg;
+  document.getElementById('msg').textContent=msg; document.querySelector('.msg').classList.toggle('alert',!!st.focus);
   counters(st);
   document.getElementById('bBack').disabled=step===0; document.getElementById('bNext').disabled=step>=nSteps()-1;
   document.querySelectorAll('#modes button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
@@ -732,12 +678,8 @@ function full(){ try{ if(!document.fullscreenElement){ const p=document.document
 document.getElementById('bFull').onclick=full;
 document.addEventListener('fullscreenchange',()=>{ document.getElementById('bFull').setAttribute('aria-pressed',!!document.fullscreenElement); });
 document.addEventListener('keydown',e=>{
-  if(e.target.closest('select,input')) return; const k=e.key.toLowerCase();
-  if(k==='arrowright'){e.preventDefault();stop();go(1);} else if(k==='arrowleft'){e.preventDefault();stop();go(-1);}
-  else if(k===' '){e.preventDefault();play();} else if(k==='r'){stop();step=0;render();} else if(k==='f'){full();}
-  else if('12345'.includes(k)&&k.length===1){setMode('m'+k);} else if(k==='w'||k==='v'){setMode('m7');} else if(k==='u'){setMode('m8');}
-  else if(mode==='m4'&&k==='s'){ const o=['first','best','worst']; cmp=false; strat=o[(o.indexOf(strat)+1)%3]; step=0; build(); render(); }
-  else if(mode==='m4'&&k==='c'){ stop(); cmp=!cmp; step=0; build(); render(); }
+  if(e.target.closest('select,input')) return;
+  if(e.key==='ArrowRight'){e.preventDefault();stop();go(1);} else if(e.key==='ArrowLeft'){e.preventDefault();stop();go(-1);}
 });
 
 function fit(){ const app=document.querySelector('.app');
@@ -749,4 +691,5 @@ let rz; window.addEventListener('resize',()=>{ fit(); clearTimeout(rz); rz=setTi
 document.addEventListener('fullscreenchange',()=>setTimeout(fit,50));
 build(); render();
 </script>
+
 </body></html>
